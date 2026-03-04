@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "bun"
+    directory: "/"
+    target-branch: "main"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
