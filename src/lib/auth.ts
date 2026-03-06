@@ -24,36 +24,24 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Too many login attempts. Try again later.");
         }
 
-        const adminEmail = process.env.ADMIN_EMAIL;
-        const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+        const user = await db.query.users.findFirst({
+          where: eq(users.email, credentials.email),
+        });
 
-        if (!adminEmail || !adminPasswordHash) {
-          throw new Error("Admin credentials not configured");
-        }
-
-        if (credentials.email !== adminEmail) {
+        if (!user) {
           return null;
         }
 
-        const isValid = await compare(credentials.password, adminPasswordHash);
+        const isValid = await compare(credentials.password, user.passwordHash);
         if (!isValid) {
           return null;
         }
 
-        // Get or create the user in DB
-        const existing = await db.query.users.findFirst({
-          where: eq(users.email, adminEmail),
-        });
-
-        if (existing) {
-          return {
-            id: existing.id,
-            email: existing.email,
-            name: existing.name,
-          };
-        }
-
-        return null;
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        };
       },
     }),
   ],
