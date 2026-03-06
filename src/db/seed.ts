@@ -1,6 +1,6 @@
+import { createInterface } from "node:readline/promises";
 import { hash } from "bcryptjs";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { createInterface } from "readline/promises";
 import postgres from "postgres";
 import * as schema from "./schema";
 
