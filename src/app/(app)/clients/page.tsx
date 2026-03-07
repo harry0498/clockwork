@@ -18,9 +18,17 @@ export default async function ClientsPage() {
       </div>
 
       {clientList.length === 0 ? (
-        <p className="text-muted-foreground">
-          No clients yet. Add your first client to get started.
-        </p>
+        <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
+          <p className="text-muted-foreground">
+            No clients yet. Add your first client to get started.
+          </p>
+          <Link
+            href="/clients/new"
+            className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            Add Client
+          </Link>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-md border border-border">
           <table className="w-full text-sm">

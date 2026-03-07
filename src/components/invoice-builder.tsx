@@ -193,9 +193,17 @@ export function InvoiceBuilder({
       )}
 
       {clientId && entries.length === 0 && (
-        <p className="text-muted-foreground">
-          No uninvoiced entries for this client.
-        </p>
+        <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
+          <p className="text-muted-foreground">
+            All caught up -- no unbilled time for this client.
+          </p>
+          <a
+            href="/entries/new"
+            className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            Log Time
+          </a>
+        </div>
       )}
     </div>
   );

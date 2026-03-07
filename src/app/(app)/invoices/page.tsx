@@ -36,7 +36,15 @@ export default async function InvoicesPage({
       <TaxYearFilter basePath="/invoices" />
 
       {invoiceList.length === 0 ? (
-        <p className="text-muted-foreground">No invoices for this tax year.</p>
+        <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
+          <p className="text-muted-foreground">No invoices yet.</p>
+          <Link
+            href="/invoices/new"
+            className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            Create Invoice
+          </Link>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-md border border-border">
           <table className="w-full text-sm">

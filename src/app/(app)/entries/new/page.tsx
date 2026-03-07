@@ -19,9 +19,17 @@ export default async function NewEntryPage({
         {entry ? "Edit Entry" : "New Entry"}
       </h1>
       {clients.length === 0 ? (
-        <p className="text-muted-foreground">
-          You need to create a client first before logging time.
-        </p>
+        <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
+          <p className="text-muted-foreground">
+            You need to create a client first before logging time.
+          </p>
+          <a
+            href="/clients/new"
+            className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            Add Client
+          </a>
+        </div>
       ) : (
         <EntryForm clients={clients} entry={entry ?? undefined} />
       )}

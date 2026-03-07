@@ -26,7 +26,15 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
 
   if (entries.length === 0) {
     return (
-      <p className="text-muted-foreground">No entries found for this period.</p>
+      <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
+        <p className="text-muted-foreground">No entries for this period.</p>
+        <Link
+          href="/entries/new"
+          className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+        >
+          Log Time
+        </Link>
+      </div>
     );
   }
 

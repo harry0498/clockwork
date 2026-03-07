@@ -26,9 +26,17 @@ export default async function NewInvoicePage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">New Invoice</h1>
       {clients.length === 0 ? (
-        <p className="text-muted-foreground">
-          Add a client and log some time first.
-        </p>
+        <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
+          <p className="text-muted-foreground">
+            You need a client and some logged time before creating an invoice.
+          </p>
+          <a
+            href="/clients/new"
+            className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            Add Client
+          </a>
+        </div>
       ) : (
         <InvoiceBuilder
           clients={clients}
