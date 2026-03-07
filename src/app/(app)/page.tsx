@@ -38,19 +38,18 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Total Hours"
-          value={formatMinutes(stats.totalMinutes)}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <StatGroup
+          label="Hours"
+          total={formatMinutes(stats.totalMinutes)}
+          invoiced={formatMinutes(stats.billedMinutes)}
+          unbilled={formatMinutes(stats.unbilledMinutes)}
         />
-        <StatCard label="Total Earned" value={formatGBP(stats.totalEarned)} />
-        <StatCard
-          label="Unbilled Hours"
-          value={formatMinutes(stats.unbilledMinutes)}
-        />
-        <StatCard
-          label="Unbilled Amount"
-          value={formatGBP(stats.unbilledAmount)}
+        <StatGroup
+          label="Earnings"
+          total={formatGBP(stats.totalEarned)}
+          invoiced={formatGBP(stats.billedAmount)}
+          unbilled={formatGBP(stats.unbilledAmount)}
         />
       </div>
 
@@ -145,11 +144,25 @@ export default async function DashboardPage() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatGroup({
+  label,
+  total,
+  invoiced,
+  unbilled,
+}: {
+  label: string;
+  total: string;
+  invoiced: string;
+  unbilled: string;
+}) {
   return (
     <div className="rounded-lg border border-border p-4">
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-2xl font-bold">{value}</p>
+      <p className="text-2xl font-bold">{total}</p>
+      <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 text-sm">
+        <p className="text-green-600">Invoiced: {invoiced}</p>
+        <p className="text-amber-600">Unbilled: {unbilled}</p>
+      </div>
     </div>
   );
 }

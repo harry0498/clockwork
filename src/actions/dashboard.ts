@@ -57,10 +57,17 @@ export async function getDashboardStats() {
       ),
     );
 
+  const totalMinutes = Number(allStats.totalMinutes);
+  const totalEarned = Number(allStats.totalEarned);
+  const unbilledMinutes = Number(unbilledStats.unbilledMinutes);
+  const unbilledAmount = Number(unbilledStats.unbilledAmount);
+
   return {
-    totalMinutes: Number(allStats.totalMinutes),
-    totalEarned: Number(allStats.totalEarned),
-    unbilledMinutes: Number(unbilledStats.unbilledMinutes),
-    unbilledAmount: Number(unbilledStats.unbilledAmount),
+    totalMinutes,
+    totalEarned,
+    unbilledMinutes,
+    unbilledAmount,
+    billedMinutes: totalMinutes - unbilledMinutes,
+    billedAmount: totalEarned - unbilledAmount,
   };
 }
