@@ -36,9 +36,6 @@ export default async function ClientsPage() {
               <tr className="border-b border-border bg-muted/50">
                 <th className="px-4 py-3 text-left font-medium">Name</th>
                 <th className="px-4 py-3 text-left font-medium">Email</th>
-                <th className="px-4 py-3 text-right font-medium">
-                  Default Rate
-                </th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
@@ -51,11 +48,6 @@ export default async function ClientsPage() {
                   <td className="px-4 py-3 font-medium">{client.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {client.email || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {client.defaultRate
-                      ? `£${Number(client.defaultRate).toFixed(2)}/hr`
-                      : "—"}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">

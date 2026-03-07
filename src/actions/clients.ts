@@ -28,8 +28,11 @@ export async function createClient(formData: FormData) {
   const raw = {
     name: formData.get("name") as string,
     email: formData.get("email") as string,
-    address: formData.get("address") as string,
-    defaultRate: formData.get("defaultRate") as string,
+    addressLine1: formData.get("addressLine1") as string,
+    addressLine2: formData.get("addressLine2") as string,
+    county: formData.get("county") as string,
+    postcode: formData.get("postcode") as string,
+    vatNumber: formData.get("vatNumber") as string,
   };
 
   const data = clientSchema.parse(raw);
@@ -38,8 +41,11 @@ export async function createClient(formData: FormData) {
     userId: session.user.id,
     name: data.name,
     email: data.email || null,
-    address: data.address || null,
-    defaultRate: data.defaultRate || null,
+    addressLine1: data.addressLine1,
+    addressLine2: data.addressLine2 || null,
+    county: data.county,
+    postcode: data.postcode,
+    vatNumber: data.vatNumber || null,
   });
 
   revalidatePath("/clients");
@@ -51,8 +57,11 @@ export async function updateClient(id: string, formData: FormData) {
   const raw = {
     name: formData.get("name") as string,
     email: formData.get("email") as string,
-    address: formData.get("address") as string,
-    defaultRate: formData.get("defaultRate") as string,
+    addressLine1: formData.get("addressLine1") as string,
+    addressLine2: formData.get("addressLine2") as string,
+    county: formData.get("county") as string,
+    postcode: formData.get("postcode") as string,
+    vatNumber: formData.get("vatNumber") as string,
   };
 
   const data = clientSchema.parse(raw);
@@ -62,8 +71,11 @@ export async function updateClient(id: string, formData: FormData) {
     .set({
       name: data.name,
       email: data.email || null,
-      address: data.address || null,
-      defaultRate: data.defaultRate || null,
+      addressLine1: data.addressLine1,
+      addressLine2: data.addressLine2 || null,
+      county: data.county,
+      postcode: data.postcode,
+      vatNumber: data.vatNumber || null,
     })
     .where(and(eq(clients.id, id), eq(clients.userId, session.user.id)));
 

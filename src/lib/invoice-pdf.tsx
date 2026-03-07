@@ -125,7 +125,10 @@ interface InvoicePdfProps {
   client: {
     name: string;
     email: string | null;
-    address: string | null;
+    addressLine1: string;
+    addressLine2: string | null;
+    county: string;
+    postcode: string;
   };
   entries: Array<{
     date: string;
@@ -149,7 +152,13 @@ export function InvoicePdf({ invoice, client, entries }: InvoicePdfProps) {
             <Text style={styles.sectionTitle}>Bill To</Text>
             <Text style={styles.clientName}>{client.name}</Text>
             {client.email && <Text>{client.email}</Text>}
-            {client.address && <Text>{client.address}</Text>}
+            {client.addressLine1 && <Text>{client.addressLine1}</Text>}
+            {client.addressLine2 && <Text>{client.addressLine2}</Text>}
+            {(client.county || client.postcode) && (
+              <Text>
+                {[client.county, client.postcode].filter(Boolean).join(", ")}
+              </Text>
+            )}
           </View>
           <View style={styles.metaBlock}>
             <Text style={styles.sectionTitle}>Invoice Details</Text>

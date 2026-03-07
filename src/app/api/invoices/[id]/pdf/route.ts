@@ -42,7 +42,10 @@ export async function GET(
       client: {
         name: invoice.client.name,
         email: invoice.client.email,
-        address: invoice.client.address,
+        addressLine1: invoice.client.addressLine1,
+        addressLine2: invoice.client.addressLine2,
+        county: invoice.client.county,
+        postcode: invoice.client.postcode,
       },
       entries: invoice.timeEntries.map((e) => ({
         date: e.date,

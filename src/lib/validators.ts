@@ -9,18 +9,11 @@ export const clientSchema = z.object({
     .max(255)
     .optional()
     .or(z.literal("")),
-  address: z.string().max(1000).optional().or(z.literal("")),
-  defaultRate: z
-    .string()
-    .optional()
-    .or(z.literal(""))
-    .transform((v) => (v ? v : undefined))
-    .pipe(
-      z
-        .string()
-        .regex(/^\d+(\.\d{1,2})?$/, "Invalid rate format")
-        .optional(),
-    ),
+  addressLine1: z.string().min(1, "Address line 1 is required").max(255),
+  addressLine2: z.string().max(255).optional().or(z.literal("")),
+  county: z.string().min(1, "County is required").max(100),
+  postcode: z.string().min(1, "Postcode is required").max(20),
+  vatNumber: z.string().max(50).optional().or(z.literal("")),
 });
 
 export type ClientInput = z.infer<typeof clientSchema>;
@@ -54,3 +47,32 @@ export const invoiceCreateSchema = z.object({
 export type InvoiceCreateInput = z.infer<typeof invoiceCreateSchema>;
 
 export const invoiceStatusSchema = z.enum(["draft", "sent", "paid"]);
+
+// User profile
+export const userProfileSchema = z.object({
+  name: z.string().min(1, "Name is required").max(255),
+  addressLine1: z.string().max(255).optional().or(z.literal("")),
+  addressLine2: z.string().max(255).optional().or(z.literal("")),
+  county: z.string().max(100).optional().or(z.literal("")),
+  postcode: z.string().max(20).optional().or(z.literal("")),
+  mobile: z.string().max(20).optional().or(z.literal("")),
+  bankName: z.string().max(100).optional().or(z.literal("")),
+  accountNumber: z.string().max(20).optional().or(z.literal("")),
+  sortCode: z.string().max(10).optional().or(z.literal("")),
+});
+
+export type UserProfileInput = z.infer<typeof userProfileSchema>;
+
+// Change password
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

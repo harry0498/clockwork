@@ -77,7 +77,17 @@ export function Nav({
         })}
       </nav>
 
-      <div className="border-t border-border p-4">
+      <div className="border-t border-border p-4 space-y-2">
+        <Link
+          href="/settings"
+          className={`block text-sm ${
+            pathname === "/settings"
+              ? "font-medium text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Settings
+        </Link>
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/login" })}

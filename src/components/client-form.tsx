@@ -9,8 +9,11 @@ interface ClientFormProps {
     id: string;
     name: string;
     email: string | null;
-    address: string | null;
-    defaultRate: string | null;
+    addressLine1: string;
+    addressLine2: string | null;
+    county: string;
+    postcode: string;
+    vatNumber: string | null;
   };
 }
 
@@ -77,29 +80,76 @@ export function ClientForm({ client }: ClientFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="address" className="text-sm font-medium">
-          Address
+        <label htmlFor="addressLine1" className="text-sm font-medium">
+          Address Line 1 *
         </label>
-        <textarea
-          id="address"
-          name="address"
-          rows={3}
-          defaultValue={client?.address ?? ""}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring resize-none"
+        <input
+          id="addressLine1"
+          name="addressLine1"
+          type="text"
+          required
+          maxLength={255}
+          defaultValue={client?.addressLine1 ?? ""}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="defaultRate" className="text-sm font-medium">
-          Default Hourly Rate (£)
+        <label htmlFor="addressLine2" className="text-sm font-medium">
+          Address Line 2
         </label>
         <input
-          id="defaultRate"
-          name="defaultRate"
+          id="addressLine2"
+          name="addressLine2"
           type="text"
-          inputMode="decimal"
-          placeholder="0.00"
-          defaultValue={client?.defaultRate ?? ""}
+          maxLength={255}
+          defaultValue={client?.addressLine2 ?? ""}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="county" className="text-sm font-medium">
+            County *
+          </label>
+          <input
+            id="county"
+            name="county"
+            type="text"
+            required
+            maxLength={100}
+            defaultValue={client?.county ?? ""}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="postcode" className="text-sm font-medium">
+            Postcode *
+          </label>
+          <input
+            id="postcode"
+            name="postcode"
+            type="text"
+            required
+            maxLength={20}
+            defaultValue={client?.postcode ?? ""}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="vatNumber" className="text-sm font-medium">
+          VAT Number
+        </label>
+        <input
+          id="vatNumber"
+          name="vatNumber"
+          type="text"
+          maxLength={50}
+          defaultValue={client?.vatNumber ?? ""}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
       </div>

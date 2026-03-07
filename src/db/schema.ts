@@ -22,6 +22,14 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  addressLine1: varchar("address_line1", { length: 255 }),
+  addressLine2: varchar("address_line2", { length: 255 }),
+  county: varchar("county", { length: 100 }),
+  postcode: varchar("postcode", { length: 20 }),
+  mobile: varchar("mobile", { length: 20 }),
+  bankName: varchar("bank_name", { length: 100 }),
+  accountNumber: varchar("account_number", { length: 20 }),
+  sortCode: varchar("sort_code", { length: 10 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -32,8 +40,11 @@ export const clients = pgTable("clients", {
     .references(() => users.id),
   name: varchar("name", { length: 200 }).notNull(),
   email: varchar("email", { length: 255 }),
-  address: text("address"),
-  defaultRate: numeric("default_rate", { precision: 10, scale: 2 }),
+  addressLine1: varchar("address_line1", { length: 255 }).notNull().default(""),
+  addressLine2: varchar("address_line2", { length: 255 }),
+  county: varchar("county", { length: 100 }).notNull().default(""),
+  postcode: varchar("postcode", { length: 20 }).notNull().default(""),
+  vatNumber: varchar("vat_number", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

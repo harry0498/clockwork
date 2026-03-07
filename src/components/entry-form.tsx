@@ -7,7 +7,6 @@ import { createEntry, updateEntry } from "@/actions/entries";
 interface Client {
   id: string;
   name: string;
-  defaultRate: string | null;
 }
 
 interface EntryFormProps {
@@ -29,13 +28,6 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
   const [loading, setLoading] = useState(false);
   const [rate, setRate] = useState(entry?.ratePerHour ?? "");
   const isEditing = !!entry;
-
-  function handleClientChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const client = clients.find((c) => c.id === e.target.value);
-    if (client?.defaultRate && !isEditing) {
-      setRate(client.defaultRate);
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -76,7 +68,6 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
           name="clientId"
           required
           defaultValue={entry?.clientId ?? ""}
-          onChange={handleClientChange}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         >
           <option value="">Select a client</option>

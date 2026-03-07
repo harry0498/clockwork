@@ -51,7 +51,7 @@ export default async function InvoiceDetailPage({
         </div>
       </div>
 
-      {invoice.client.address && (
+      {invoice.client.addressLine1 && (
         <div className="rounded-lg border border-border p-4">
           <p className="text-sm text-muted-foreground mb-1">Bill To</p>
           <p className="font-medium">{invoice.client.name}</p>
@@ -60,9 +60,17 @@ export default async function InvoiceDetailPage({
               {invoice.client.email}
             </p>
           )}
-          <p className="text-sm whitespace-pre-line mt-1">
-            {invoice.client.address}
-          </p>
+          <div className="text-sm mt-1">
+            <p>{invoice.client.addressLine1}</p>
+            {invoice.client.addressLine2 && (
+              <p>{invoice.client.addressLine2}</p>
+            )}
+            <p>
+              {[invoice.client.county, invoice.client.postcode]
+                .filter(Boolean)
+                .join(", ")}
+            </p>
+          </div>
         </div>
       )}
 
