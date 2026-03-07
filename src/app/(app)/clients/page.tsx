@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { getClients } from "@/actions/clients";
+import { getClientsWithStats } from "@/actions/clients";
 import { ClientDeleteButton } from "@/components/client-delete-button";
+import { formatGBP, formatMinutes } from "@/lib/tax-year";
 
 export default async function ClientsPage() {
-  const clientList = await getClients();
+  const clientList = await getClientsWithStats();
 
   return (
     <div className="space-y-6">
@@ -36,6 +37,13 @@ export default async function ClientsPage() {
               <tr className="border-b border-border bg-muted/50">
                 <th className="px-4 py-3 text-left font-medium">Name</th>
                 <th className="px-4 py-3 text-left font-medium">Email</th>
+                <th className="px-4 py-3 text-right font-medium">
+                  Total Hours
+                </th>
+                <th className="px-4 py-3 text-right font-medium">
+                  Total Earned
+                </th>
+                <th className="px-4 py-3 text-right font-medium">Unbilled</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
@@ -47,7 +55,16 @@ export default async function ClientsPage() {
                 >
                   <td className="px-4 py-3 font-medium">{client.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {client.email || "—"}
+                    {client.email || "\u2014"}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {formatMinutes(client.totalMinutes)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {formatGBP(client.totalEarned)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {formatGBP(client.unbilledAmount)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">

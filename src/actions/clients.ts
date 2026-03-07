@@ -1,9 +1,9 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { clients } from "@/db/schema";
+import { clients, timeEntries } from "@/db/schema";
 import { requireSession } from "@/lib/session";
 import { clientSchema } from "@/lib/validators";
 
@@ -13,6 +13,32 @@ export async function getClients() {
     where: eq(clients.userId, session.user.id),
     orderBy: (clients, { asc }) => [asc(clients.name)],
   });
+}
+
+export async function getClientsWithStats() {
+  const session = await requireSession();
+
+  const rows = await db
+    .select({
+      id: clients.id,
+      name: clients.name,
+      email: clients.email,
+      totalMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
+      totalEarned: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
+      unbilledAmount: sql<number>`coalesce(sum(case when ${timeEntries.invoiceId} is null and ${timeEntries.manuallyInvoiced} = false then ${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0 else 0 end), 0)`,
+    })
+    .from(clients)
+    .leftJoin(timeEntries, eq(clients.id, timeEntries.clientId))
+    .where(eq(clients.userId, session.user.id))
+    .groupBy(clients.id, clients.name, clients.email)
+    .orderBy(clients.name);
+
+  return rows.map((row) => ({
+    ...row,
+    totalMinutes: Number(row.totalMinutes),
+    totalEarned: Number(row.totalEarned),
+    unbilledAmount: Number(row.unbilledAmount),
+  }));
 }
 
 export async function getClient(id: string) {

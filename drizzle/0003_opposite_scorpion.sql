@@ -1,0 +1,1 @@
+ALTER TABLE "time_entries" ADD COLUMN "manually_invoiced" boolean DEFAULT false NOT NULL;

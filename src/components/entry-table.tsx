@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { deleteEntry } from "@/actions/entries";
+import { deleteEntry, toggleManuallyInvoiced } from "@/actions/entries";
 import { formatGBP, formatMinutes } from "@/lib/tax-year";
 
 interface Entry {
@@ -12,6 +12,7 @@ interface Entry {
   ratePerHour: string;
   date: string;
   invoiceId: string | null;
+  manuallyInvoiced: boolean;
   client: { id: string; name: string };
 }
 
@@ -21,6 +22,11 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
   async function handleDelete(id: string) {
     if (!confirm("Delete this entry?")) return;
     await deleteEntry(id);
+    router.refresh();
+  }
+
+  async function handleToggleInvoiced(id: string) {
+    await toggleManuallyInvoiced(id);
     router.refresh();
   }
 
@@ -57,6 +63,7 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
           {entries.map((entry) => {
             const amount =
               (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
+            const isLocked = !!entry.invoiceId || entry.manuallyInvoiced;
             return (
               <tr
                 key={entry.id}
@@ -80,13 +87,21 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
                       Yes
                     </span>
                   ) : (
-                    <span className="inline-block rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                      No
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleInvoiced(entry.id)}
+                      className={`inline-block rounded-full px-2 py-0.5 text-xs cursor-pointer ${
+                        entry.manuallyInvoiced
+                          ? "bg-green-100 text-green-800"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {entry.manuallyInvoiced ? "Yes" : "No"}
+                    </button>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  {!entry.invoiceId && (
+                  {!isLocked && (
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         href={`/entries/new?id=${entry.id}`}

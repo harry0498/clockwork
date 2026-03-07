@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  boolean,
   date,
   integer,
   numeric,
@@ -78,6 +79,7 @@ export const timeEntries = pgTable("time_entries", {
   ratePerHour: numeric("rate_per_hour", { precision: 10, scale: 2 }).notNull(),
   date: date("date").notNull(),
   invoiceId: uuid("invoice_id").references(() => invoices.id),
+  manuallyInvoiced: boolean("manually_invoiced").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

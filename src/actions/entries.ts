@@ -32,6 +32,7 @@ export async function getEntries(options?: {
 
   if (options?.uninvoicedOnly) {
     conditions.push(isNull(timeEntries.invoiceId));
+    conditions.push(eq(timeEntries.manuallyInvoiced, false));
   }
 
   const sortFn = options?.sortDir === "asc" ? asc : desc;
@@ -127,6 +128,32 @@ export async function deleteEntry(id: string) {
 
   await db
     .delete(timeEntries)
+    .where(
+      and(eq(timeEntries.id, id), eq(timeEntries.userId, session.user.id)),
+    );
+
+  revalidatePath("/entries");
+  revalidatePath("/");
+}
+
+export async function toggleManuallyInvoiced(id: string) {
+  const session = await requireSession();
+
+  const entry = await db.query.timeEntries.findFirst({
+    where: and(eq(timeEntries.id, id), eq(timeEntries.userId, session.user.id)),
+  });
+
+  if (!entry) {
+    throw new Error("Entry not found");
+  }
+
+  if (entry.invoiceId) {
+    throw new Error("Cannot toggle manually invoiced on an invoiced entry");
+  }
+
+  await db
+    .update(timeEntries)
+    .set({ manuallyInvoiced: !entry.manuallyInvoiced })
     .where(
       and(eq(timeEntries.id, id), eq(timeEntries.userId, session.user.id)),
     );

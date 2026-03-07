@@ -49,7 +49,13 @@ export async function getDashboardStats() {
       unbilledAmount: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
     })
     .from(timeEntries)
-    .where(and(baseWhere, isNull(timeEntries.invoiceId)));
+    .where(
+      and(
+        baseWhere,
+        isNull(timeEntries.invoiceId),
+        eq(timeEntries.manuallyInvoiced, false),
+      ),
+    );
 
   return {
     totalMinutes: Number(allStats.totalMinutes),

@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const onboardingComplete =
     onboarding.hasClients && onboarding.hasEntries && onboarding.hasInvoices;
 
-  if (!onboardingComplete) {
+  if (!onboarding.hasClients) {
     return <GettingStarted onboarding={onboarding} />;
   }
 
@@ -26,6 +26,8 @@ export default async function DashboardPage() {
   ]);
 
   const taxYear = getTaxYearBounds(getCurrentTaxYearStart());
+
+  const remainingSteps = steps.filter((step) => !onboarding[step.key]);
 
   return (
     <div className="space-y-8">
@@ -51,6 +53,36 @@ export default async function DashboardPage() {
           value={formatGBP(stats.unbilledAmount)}
         />
       </div>
+
+      {!onboardingComplete && remainingSteps.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold">Next Steps</h2>
+          <div className="space-y-2">
+            {remainingSteps.map((step) => (
+              <div
+                key={step.num}
+                className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3"
+              >
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-sm font-medium text-muted-foreground">
+                  {step.num}
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">{step.title}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {step.description}
+                  </p>
+                </div>
+                <Link
+                  href={step.href}
+                  className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:opacity-90"
+                >
+                  {step.cta}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {clients.length > 0 && (
         <div className="space-y-3">
