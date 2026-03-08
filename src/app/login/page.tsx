@@ -1,32 +1,33 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { type LoginInput, loginSchema } from "@/lib/validators";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
+  async function onSubmit(data: LoginInput) {
     const result = await signIn("credentials", {
-      email,
-      password,
+      email: data.email,
+      password: data.password,
       redirect: false,
     });
 
     if (result?.error) {
-      setError("Invalid email or password");
-      setLoading(false);
+      setError("root", { message: "Invalid email or password" });
     } else {
       router.push("/");
       router.refresh();
@@ -43,10 +44,10 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {errors.root && (
             <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-              {error}
+              {errors.root.message}
             </div>
           )}
 
@@ -56,12 +57,14 @@ export default function LoginPage() {
             </label>
             <input
               id="email"
-              name="email"
               type="email"
-              required
               autoComplete="email"
+              {...register("email")}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
             />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -70,20 +73,24 @@ export default function LoginPage() {
             </label>
             <input
               id="password"
-              name="password"
               type="password"
-              required
               autoComplete="current-password"
+              {...register("password")}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
             />
+            {errors.password && (
+              <p className="text-sm text-destructive">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
       </div>

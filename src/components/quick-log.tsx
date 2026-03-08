@@ -1,38 +1,56 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { createEntry } from "@/actions/entries";
 import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
 import { todayISO } from "@/lib/tax-year";
 import type { ClientPick } from "@/lib/types";
+import { type EntryInput, entrySchema } from "@/lib/validators";
 
 export function QuickLog({ clients }: { clients: ClientPick[] }) {
   const router = useRouter();
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [rate, setRate] = useState("");
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const today = todayISO();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<EntryInput>({
+    resolver: zodResolver(entrySchema),
+    defaultValues: {
+      clientId: "",
+      title: "",
+      notes: "",
+      minutes: NaN,
+      ratePerHour: "",
+      date: today,
+    },
+  });
+
+  async function onSubmit(data: EntryInput) {
     setError("");
-    setLoading(true);
-
     try {
-      const formData = new FormData(e.currentTarget);
-      await createEntry(formData);
-      e.currentTarget.reset();
-      setRate("");
+      await createEntry(data);
+      reset({
+        clientId: "",
+        title: "",
+        notes: "",
+        minutes: NaN,
+        ratePerHour: "",
+        date: today,
+      });
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
     }
   }
-
-  const today = todayISO();
 
   if (clients.length === 0) {
     return (
@@ -43,10 +61,21 @@ export function QuickLog({ clients }: { clients: ClientPick[] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
       {error && <Alert message={error} variant="error" />}
+      {(errors.clientId ||
+        errors.title ||
+        errors.minutes ||
+        errors.ratePerHour) && (
+        <p className="text-sm text-destructive">
+          {errors.clientId?.message ??
+            errors.title?.message ??
+            errors.minutes?.message ??
+            errors.ratePerHour?.message}
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <select name="clientId" required className={inputClassName}>
+        <select {...register("clientId")} className={inputClassName}>
           <option value="">Client</option>
           {clients.map((c) => (
             <option key={c.id} value={c.id}>
@@ -55,39 +84,34 @@ export function QuickLog({ clients }: { clients: ClientPick[] }) {
           ))}
         </select>
         <input
-          name="title"
           type="text"
-          required
           placeholder="What did you work on?"
+          {...register("title")}
           className={inputClassName}
         />
         <input
-          name="minutes"
           type="number"
-          required
           min={1}
           placeholder="Minutes"
+          {...register("minutes", { valueAsNumber: true })}
           className={inputClassName}
         />
         <input
-          name="ratePerHour"
           type="text"
           inputMode="decimal"
-          required
           placeholder="£/hr"
-          value={rate}
-          onChange={(e) => setRate(e.target.value)}
+          {...register("ratePerHour")}
           className={inputClassName}
         />
       </div>
-      <input name="date" type="hidden" value={today} />
-      <input name="notes" type="hidden" value="" />
+      <input type="hidden" {...register("date")} />
+      <input type="hidden" {...register("notes")} />
       <button
         type="submit"
-        disabled={loading}
+        disabled={isSubmitting}
         className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
       >
-        {loading ? "Logging..." : "Quick Log"}
+        {isSubmitting ? "Logging..." : "Quick Log"}
       </button>
     </form>
   );

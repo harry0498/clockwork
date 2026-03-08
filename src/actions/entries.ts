@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { timeEntries } from "@/db/schema";
 import { requireSession } from "@/lib/session";
 import { getCurrentTaxYearStart, getTaxYearBounds } from "@/lib/tax-year";
-import { entrySchema } from "@/lib/validators";
+import { type EntryInput, entrySchema } from "@/lib/validators";
 
 export async function getEntries(options?: {
   taxYear?: number;
@@ -63,20 +63,9 @@ export async function getEntry(id: string) {
   });
 }
 
-function extractEntryFields(formData: FormData) {
-  return entrySchema.parse({
-    clientId: formData.get("clientId") as string,
-    title: formData.get("title") as string,
-    notes: formData.get("notes") as string,
-    minutes: formData.get("minutes") as string,
-    ratePerHour: formData.get("ratePerHour") as string,
-    date: formData.get("date") as string,
-  });
-}
-
-export async function createEntry(formData: FormData) {
+export async function createEntry(input: EntryInput) {
   const session = await requireSession();
-  const data = extractEntryFields(formData);
+  const data = entrySchema.parse(input);
 
   await db.insert(timeEntries).values({
     userId: session.user.id,
@@ -92,9 +81,9 @@ export async function createEntry(formData: FormData) {
   revalidatePath("/");
 }
 
-export async function updateEntry(id: string, formData: FormData) {
+export async function updateEntry(id: string, input: EntryInput) {
   const session = await requireSession();
-  const data = extractEntryFields(formData);
+  const data = entrySchema.parse(input);
 
   await db
     .update(timeEntries)

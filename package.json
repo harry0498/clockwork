@@ -15,6 +15,7 @@
     "seed": "bun src/db/seed.ts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@react-pdf/renderer": "^4.3.2",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.1",
@@ -23,6 +24,7 @@
     "postgres": "^3.4.8",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-hook-form": "^7.71.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {

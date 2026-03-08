@@ -6,7 +6,12 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { requireSession } from "@/lib/session";
-import { changePasswordSchema, userProfileSchema } from "@/lib/validators";
+import {
+  type ChangePasswordInput,
+  changePasswordSchema,
+  type UserProfileInput,
+  userProfileSchema,
+} from "@/lib/validators";
 
 export async function getProfile() {
   const session = await requireSession();
@@ -33,22 +38,10 @@ export async function getProfile() {
   return user;
 }
 
-export async function updateProfile(formData: FormData) {
+export async function updateProfile(input: UserProfileInput) {
   const session = await requireSession();
 
-  const raw = {
-    name: formData.get("name") as string,
-    addressLine1: formData.get("addressLine1") as string,
-    addressLine2: formData.get("addressLine2") as string,
-    county: formData.get("county") as string,
-    postcode: formData.get("postcode") as string,
-    mobile: formData.get("mobile") as string,
-    bankName: formData.get("bankName") as string,
-    accountNumber: formData.get("accountNumber") as string,
-    sortCode: formData.get("sortCode") as string,
-  };
-
-  const data = userProfileSchema.parse(raw);
+  const data = userProfileSchema.parse(input);
 
   await db
     .update(users)
@@ -68,16 +61,10 @@ export async function updateProfile(formData: FormData) {
   revalidatePath("/settings");
 }
 
-export async function changePassword(formData: FormData) {
+export async function changePassword(input: ChangePasswordInput) {
   const session = await requireSession();
 
-  const raw = {
-    currentPassword: formData.get("currentPassword") as string,
-    newPassword: formData.get("newPassword") as string,
-    confirmPassword: formData.get("confirmPassword") as string,
-  };
-
-  const data = changePasswordSchema.parse(raw);
+  const data = changePasswordSchema.parse(input);
 
   const user = await db.query.users.findFirst({
     where: eq(users.id, session.user.id),

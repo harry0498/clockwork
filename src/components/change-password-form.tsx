@@ -1,36 +1,48 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { changePassword } from "@/actions/settings";
 import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
+import {
+  type ChangePasswordInput,
+  changePasswordSchema,
+} from "@/lib/validators";
 
 export function ChangePasswordForm() {
-  const formRef = useRef<HTMLFormElement>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ChangePasswordInput>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  async function onSubmit(data: ChangePasswordInput) {
     setError("");
     setSuccess("");
-    setLoading(true);
-
     try {
-      const formData = new FormData(e.currentTarget);
-      await changePassword(formData);
+      await changePassword(data);
       setSuccess("Password changed successfully");
-      formRef.current?.reset();
+      reset();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
     }
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && <Alert message={error} variant="error" />}
       {success && <Alert message={success} variant="success" />}
 
@@ -40,11 +52,15 @@ export function ChangePasswordForm() {
         </label>
         <input
           id="currentPassword"
-          name="currentPassword"
           type="password"
-          required
+          {...register("currentPassword")}
           className={inputClassName}
         />
+        {errors.currentPassword && (
+          <p className="text-sm text-destructive">
+            {errors.currentPassword.message}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -53,12 +69,15 @@ export function ChangePasswordForm() {
         </label>
         <input
           id="newPassword"
-          name="newPassword"
           type="password"
-          required
-          minLength={8}
+          {...register("newPassword")}
           className={inputClassName}
         />
+        {errors.newPassword && (
+          <p className="text-sm text-destructive">
+            {errors.newPassword.message}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -67,19 +86,23 @@ export function ChangePasswordForm() {
         </label>
         <input
           id="confirmPassword"
-          name="confirmPassword"
           type="password"
-          required
+          {...register("confirmPassword")}
           className={inputClassName}
         />
+        {errors.confirmPassword && (
+          <p className="text-sm text-destructive">
+            {errors.confirmPassword.message}
+          </p>
+        )}
       </div>
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={isSubmitting}
         className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
       >
-        {loading ? "Changing..." : "Change Password"}
+        {isSubmitting ? "Changing..." : "Change Password"}
       </button>
     </form>
   );

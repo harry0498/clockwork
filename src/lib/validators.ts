@@ -23,7 +23,7 @@ export const entrySchema = z.object({
   clientId: z.string().uuid("Select a client"),
   title: z.string().min(1, "Title is required").max(200),
   notes: z.string().max(2000).optional().or(z.literal("")),
-  minutes: z.coerce
+  minutes: z
     .number()
     .int()
     .min(1, "Minutes must be at least 1")
@@ -62,6 +62,14 @@ export const userProfileSchema = z.object({
 });
 
 export type UserProfileInput = z.infer<typeof userProfileSchema>;
+
+// Login
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
 
 // Change password
 export const changePasswordSchema = z

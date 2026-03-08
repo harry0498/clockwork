@@ -1,11 +1,14 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { createClient, updateClient } from "@/actions/clients";
 import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
 import type { Client } from "@/lib/types";
+import { type ClientInput, clientSchema } from "@/lib/validators";
 
 interface ClientFormProps {
   client?: Pick<
@@ -24,31 +27,42 @@ interface ClientFormProps {
 export function ClientForm({ client }: ClientFormProps) {
   const router = useRouter();
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const isEditing = !!client;
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ClientInput>({
+    resolver: zodResolver(clientSchema),
+    defaultValues: {
+      name: client?.name ?? "",
+      email: client?.email ?? "",
+      addressLine1: client?.addressLine1 ?? "",
+      addressLine2: client?.addressLine2 ?? "",
+      county: client?.county ?? "",
+      postcode: client?.postcode ?? "",
+      vatNumber: client?.vatNumber ?? "",
+    },
+  });
 
+  async function onSubmit(data: ClientInput) {
+    setError("");
     try {
-      const formData = new FormData(e.currentTarget);
       if (isEditing) {
-        await updateClient(client.id, formData);
+        await updateClient(client.id, data);
       } else {
-        await createClient(formData);
+        await createClient(data);
       }
       router.push("/clients");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-      setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-md space-y-4">
       {error && <Alert message={error} variant="error" />}
 
       <div className="space-y-2">
@@ -57,13 +71,14 @@ export function ClientForm({ client }: ClientFormProps) {
         </label>
         <input
           id="name"
-          name="name"
           type="text"
-          required
           maxLength={200}
-          defaultValue={client?.name ?? ""}
+          {...register("name")}
           className={inputClassName}
         />
+        {errors.name && (
+          <p className="text-sm text-destructive">{errors.name.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -72,11 +87,13 @@ export function ClientForm({ client }: ClientFormProps) {
         </label>
         <input
           id="email"
-          name="email"
           type="email"
-          defaultValue={client?.email ?? ""}
+          {...register("email")}
           className={inputClassName}
         />
+        {errors.email && (
+          <p className="text-sm text-destructive">{errors.email.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -85,13 +102,16 @@ export function ClientForm({ client }: ClientFormProps) {
         </label>
         <input
           id="addressLine1"
-          name="addressLine1"
           type="text"
-          required
           maxLength={255}
-          defaultValue={client?.addressLine1 ?? ""}
+          {...register("addressLine1")}
           className={inputClassName}
         />
+        {errors.addressLine1 && (
+          <p className="text-sm text-destructive">
+            {errors.addressLine1.message}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -100,12 +120,16 @@ export function ClientForm({ client }: ClientFormProps) {
         </label>
         <input
           id="addressLine2"
-          name="addressLine2"
           type="text"
           maxLength={255}
-          defaultValue={client?.addressLine2 ?? ""}
+          {...register("addressLine2")}
           className={inputClassName}
         />
+        {errors.addressLine2 && (
+          <p className="text-sm text-destructive">
+            {errors.addressLine2.message}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -115,13 +139,14 @@ export function ClientForm({ client }: ClientFormProps) {
           </label>
           <input
             id="county"
-            name="county"
             type="text"
-            required
             maxLength={100}
-            defaultValue={client?.county ?? ""}
+            {...register("county")}
             className={inputClassName}
           />
+          {errors.county && (
+            <p className="text-sm text-destructive">{errors.county.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -130,13 +155,16 @@ export function ClientForm({ client }: ClientFormProps) {
           </label>
           <input
             id="postcode"
-            name="postcode"
             type="text"
-            required
             maxLength={20}
-            defaultValue={client?.postcode ?? ""}
+            {...register("postcode")}
             className={inputClassName}
           />
+          {errors.postcode && (
+            <p className="text-sm text-destructive">
+              {errors.postcode.message}
+            </p>
+          )}
         </div>
       </div>
 
@@ -146,21 +174,23 @@ export function ClientForm({ client }: ClientFormProps) {
         </label>
         <input
           id="vatNumber"
-          name="vatNumber"
           type="text"
           maxLength={50}
-          defaultValue={client?.vatNumber ?? ""}
+          {...register("vatNumber")}
           className={inputClassName}
         />
+        {errors.vatNumber && (
+          <p className="text-sm text-destructive">{errors.vatNumber.message}</p>
+        )}
       </div>
 
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={isSubmitting}
           className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
         >
-          {loading
+          {isSubmitting
             ? "Saving..."
             : isEditing
               ? "Update Client"

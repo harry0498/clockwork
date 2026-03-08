@@ -1,10 +1,13 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { updateProfile } from "@/actions/settings";
 import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
 import type { User } from "@/lib/types";
+import { type UserProfileInput, userProfileSchema } from "@/lib/validators";
 
 interface SettingsFormProps {
   profile: Pick<
@@ -25,27 +28,39 @@ interface SettingsFormProps {
 export function SettingsForm({ profile }: SettingsFormProps) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<UserProfileInput>({
+    resolver: zodResolver(userProfileSchema),
+    defaultValues: {
+      name: profile.name,
+      addressLine1: profile.addressLine1 ?? "",
+      addressLine2: profile.addressLine2 ?? "",
+      county: profile.county ?? "",
+      postcode: profile.postcode ?? "",
+      mobile: profile.mobile ?? "",
+      bankName: profile.bankName ?? "",
+      accountNumber: profile.accountNumber ?? "",
+      sortCode: profile.sortCode ?? "",
+    },
+  });
+
+  async function onSubmit(data: UserProfileInput) {
     setError("");
     setSuccess("");
-    setLoading(true);
-
     try {
-      const formData = new FormData(e.currentTarget);
-      await updateProfile(formData);
+      await updateProfile(data);
       setSuccess("Profile updated successfully");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {error && <Alert message={error} variant="error" />}
       {success && <Alert message={success} variant="success" />}
 
@@ -58,13 +73,14 @@ export function SettingsForm({ profile }: SettingsFormProps) {
           </label>
           <input
             id="name"
-            name="name"
             type="text"
-            required
             maxLength={255}
-            defaultValue={profile.name}
+            {...register("name")}
             className={inputClassName}
           />
+          {errors.name && (
+            <p className="text-sm text-destructive">{errors.name.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -78,12 +94,14 @@ export function SettingsForm({ profile }: SettingsFormProps) {
           </label>
           <input
             id="mobile"
-            name="mobile"
             type="tel"
             maxLength={20}
-            defaultValue={profile.mobile ?? ""}
+            {...register("mobile")}
             className={inputClassName}
           />
+          {errors.mobile && (
+            <p className="text-sm text-destructive">{errors.mobile.message}</p>
+          )}
         </div>
       </div>
 
@@ -96,12 +114,16 @@ export function SettingsForm({ profile }: SettingsFormProps) {
           </label>
           <input
             id="addressLine1"
-            name="addressLine1"
             type="text"
             maxLength={255}
-            defaultValue={profile.addressLine1 ?? ""}
+            {...register("addressLine1")}
             className={inputClassName}
           />
+          {errors.addressLine1 && (
+            <p className="text-sm text-destructive">
+              {errors.addressLine1.message}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -110,12 +132,16 @@ export function SettingsForm({ profile }: SettingsFormProps) {
           </label>
           <input
             id="addressLine2"
-            name="addressLine2"
             type="text"
             maxLength={255}
-            defaultValue={profile.addressLine2 ?? ""}
+            {...register("addressLine2")}
             className={inputClassName}
           />
+          {errors.addressLine2 && (
+            <p className="text-sm text-destructive">
+              {errors.addressLine2.message}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -125,12 +151,16 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             </label>
             <input
               id="county"
-              name="county"
               type="text"
               maxLength={100}
-              defaultValue={profile.county ?? ""}
+              {...register("county")}
               className={inputClassName}
             />
+            {errors.county && (
+              <p className="text-sm text-destructive">
+                {errors.county.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -139,12 +169,16 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             </label>
             <input
               id="postcode"
-              name="postcode"
               type="text"
               maxLength={20}
-              defaultValue={profile.postcode ?? ""}
+              {...register("postcode")}
               className={inputClassName}
             />
+            {errors.postcode && (
+              <p className="text-sm text-destructive">
+                {errors.postcode.message}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -158,12 +192,16 @@ export function SettingsForm({ profile }: SettingsFormProps) {
           </label>
           <input
             id="bankName"
-            name="bankName"
             type="text"
             maxLength={100}
-            defaultValue={profile.bankName ?? ""}
+            {...register("bankName")}
             className={inputClassName}
           />
+          {errors.bankName && (
+            <p className="text-sm text-destructive">
+              {errors.bankName.message}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -173,12 +211,16 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             </label>
             <input
               id="accountNumber"
-              name="accountNumber"
               type="text"
               maxLength={20}
-              defaultValue={profile.accountNumber ?? ""}
+              {...register("accountNumber")}
               className={inputClassName}
             />
+            {errors.accountNumber && (
+              <p className="text-sm text-destructive">
+                {errors.accountNumber.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -187,22 +229,26 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             </label>
             <input
               id="sortCode"
-              name="sortCode"
               type="text"
               maxLength={10}
-              defaultValue={profile.sortCode ?? ""}
+              {...register("sortCode")}
               className={inputClassName}
             />
+            {errors.sortCode && (
+              <p className="text-sm text-destructive">
+                {errors.sortCode.message}
+              </p>
+            )}
           </div>
         </div>
       </div>
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={isSubmitting}
         className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
       >
-        {loading ? "Saving..." : "Save Changes"}
+        {isSubmitting ? "Saving..." : "Save Changes"}
       </button>
     </form>
   );

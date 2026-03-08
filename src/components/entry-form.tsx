@@ -1,12 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { createEntry, updateEntry } from "@/actions/entries";
 import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
 import { todayISO } from "@/lib/tax-year";
 import type { ClientPick, TimeEntry } from "@/lib/types";
+import { type EntryInput, entrySchema } from "@/lib/validators";
 
 interface EntryFormProps {
   clients: ClientPick[];
@@ -19,34 +22,41 @@ interface EntryFormProps {
 export function EntryForm({ clients, entry }: EntryFormProps) {
   const router = useRouter();
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [rate, setRate] = useState(entry?.ratePerHour ?? "");
   const isEditing = !!entry;
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<EntryInput>({
+    resolver: zodResolver(entrySchema),
+    defaultValues: {
+      clientId: entry?.clientId ?? "",
+      title: entry?.title ?? "",
+      notes: entry?.notes ?? "",
+      minutes: entry?.minutes ?? NaN,
+      ratePerHour: entry?.ratePerHour ?? "",
+      date: entry?.date ?? todayISO(),
+    },
+  });
 
+  async function onSubmit(data: EntryInput) {
+    setError("");
     try {
-      const formData = new FormData(e.currentTarget);
       if (isEditing) {
-        await updateEntry(entry.id, formData);
+        await updateEntry(entry.id, data);
       } else {
-        await createEntry(formData);
+        await createEntry(data);
       }
       router.push("/entries");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-      setLoading(false);
     }
   }
 
-  const today = todayISO();
-
   return (
-    <form onSubmit={handleSubmit} className="max-w-md space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-md space-y-4">
       {error && <Alert message={error} variant="error" />}
 
       <div className="space-y-2">
@@ -55,9 +65,7 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
         </label>
         <select
           id="clientId"
-          name="clientId"
-          required
-          defaultValue={entry?.clientId ?? ""}
+          {...register("clientId")}
           className={inputClassName}
         >
           <option value="">Select a client</option>
@@ -67,6 +75,9 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
             </option>
           ))}
         </select>
+        {errors.clientId && (
+          <p className="text-sm text-destructive">{errors.clientId.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -75,13 +86,14 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
         </label>
         <input
           id="title"
-          name="title"
           type="text"
-          required
           maxLength={200}
-          defaultValue={entry?.title ?? ""}
+          {...register("title")}
           className={inputClassName}
         />
+        {errors.title && (
+          <p className="text-sm text-destructive">{errors.title.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -90,11 +102,13 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
         </label>
         <textarea
           id="notes"
-          name="notes"
           rows={3}
-          defaultValue={entry?.notes ?? ""}
+          {...register("notes")}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring resize-none"
         />
+        {errors.notes && (
+          <p className="text-sm text-destructive">{errors.notes.message}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -104,14 +118,15 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
           </label>
           <input
             id="minutes"
-            name="minutes"
             type="number"
-            required
             min={1}
             max={1440}
-            defaultValue={entry?.minutes ?? ""}
+            {...register("minutes", { valueAsNumber: true })}
             className={inputClassName}
           />
+          {errors.minutes && (
+            <p className="text-sm text-destructive">{errors.minutes.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -120,14 +135,16 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
           </label>
           <input
             id="ratePerHour"
-            name="ratePerHour"
             type="text"
             inputMode="decimal"
-            required
-            value={rate}
-            onChange={(e) => setRate(e.target.value)}
+            {...register("ratePerHour")}
             className={inputClassName}
           />
+          {errors.ratePerHour && (
+            <p className="text-sm text-destructive">
+              {errors.ratePerHour.message}
+            </p>
+          )}
         </div>
       </div>
 
@@ -137,21 +154,22 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
         </label>
         <input
           id="date"
-          name="date"
           type="date"
-          required
-          defaultValue={entry?.date ?? today}
+          {...register("date")}
           className={inputClassName}
         />
+        {errors.date && (
+          <p className="text-sm text-destructive">{errors.date.message}</p>
+        )}
       </div>
 
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={isSubmitting}
           className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
         >
-          {loading ? "Saving..." : isEditing ? "Update Entry" : "Log Time"}
+          {isSubmitting ? "Saving..." : isEditing ? "Update Entry" : "Log Time"}
         </button>
         <button
           type="button"

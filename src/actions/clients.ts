@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { clients, timeEntries } from "@/db/schema";
 import { requireSession } from "@/lib/session";
-import { clientSchema } from "@/lib/validators";
+import { type ClientInput, clientSchema } from "@/lib/validators";
 
 export async function getClients() {
   const session = await requireSession();
@@ -48,19 +48,7 @@ export async function getClient(id: string) {
   });
 }
 
-function extractClientFields(formData: FormData) {
-  return clientSchema.parse({
-    name: formData.get("name") as string,
-    email: formData.get("email") as string,
-    addressLine1: formData.get("addressLine1") as string,
-    addressLine2: formData.get("addressLine2") as string,
-    county: formData.get("county") as string,
-    postcode: formData.get("postcode") as string,
-    vatNumber: formData.get("vatNumber") as string,
-  });
-}
-
-function clientFieldsToValues(data: ReturnType<typeof extractClientFields>) {
+function clientFieldsToValues(data: ClientInput) {
   return {
     name: data.name,
     email: data.email || null,
@@ -72,9 +60,9 @@ function clientFieldsToValues(data: ReturnType<typeof extractClientFields>) {
   };
 }
 
-export async function createClient(formData: FormData) {
+export async function createClient(input: ClientInput) {
   const session = await requireSession();
-  const data = extractClientFields(formData);
+  const data = clientSchema.parse(input);
 
   await db.insert(clients).values({
     userId: session.user.id,
@@ -84,9 +72,9 @@ export async function createClient(formData: FormData) {
   revalidatePath("/clients");
 }
 
-export async function updateClient(id: string, formData: FormData) {
+export async function updateClient(id: string, input: ClientInput) {
   const session = await requireSession();
-  const data = extractClientFields(formData);
+  const data = clientSchema.parse(input);
 
   await db
     .update(clients)
