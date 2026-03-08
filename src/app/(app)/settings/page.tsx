@@ -6,7 +6,7 @@ export default async function SettingsPage() {
   const profile = await getProfile();
 
   return (
-    <div className="space-y-8 max-w-md">
+    <div className="space-y-8 w-full max-w-md">
       <h1 className="text-2xl font-bold">Settings</h1>
 
       <SettingsForm profile={profile} />

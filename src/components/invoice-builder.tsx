@@ -95,7 +95,7 @@ export function InvoiceBuilder({
     <div className="space-y-6">
       {error && <Alert message={error} variant="error" />}
 
-      <div className="max-w-xs space-y-2">
+      <div className="w-full max-w-xs space-y-2">
         <label htmlFor="clientId" className="text-sm font-medium">
           Client
         </label>

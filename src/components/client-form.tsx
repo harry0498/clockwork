@@ -62,7 +62,10 @@ export function ClientForm({ client }: ClientFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-md space-y-4">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="w-full max-w-md space-y-4"
+    >
       {error && <Alert message={error} variant="error" />}
 
       <div className="space-y-2">
@@ -132,7 +135,7 @@ export function ClientForm({ client }: ClientFormProps) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="county" className="text-sm font-medium">
             County *

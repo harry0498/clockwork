@@ -43,7 +43,7 @@ export function InvoiceTable({ invoices }: { invoices: InvoiceWithClient[] }) {
       ),
     },
     { header: "Client", accessor: (inv) => inv.client.name },
-    { header: "Date", accessor: "issuedAt" },
+    { header: "Date", accessor: "issuedAt", hideOnMobile: true },
     {
       header: "Total",
       accessor: (inv) => formatGBP(inv.totalAmount),

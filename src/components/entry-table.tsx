@@ -43,16 +43,19 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
       header: "Rate",
       accessor: (e) => `${formatGBP(e.ratePerHour)}/hr`,
       align: "right",
+      hideOnMobile: true,
     },
     {
       header: "Amount",
       accessor: (e) => formatGBP(calculateAmount(e.minutes, e.ratePerHour)),
       align: "right",
       className: "font-medium",
+      hideOnMobile: true,
     },
     {
       header: "Invoiced",
       align: "center",
+      hideOnMobile: true,
       accessor: (e) => (
         <span
           className={`inline-block rounded-full px-2 py-0.5 text-xs ${

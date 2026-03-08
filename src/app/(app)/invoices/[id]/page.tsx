@@ -24,7 +24,7 @@ export default async function InvoiceDetailPage({
           <h1 className="text-2xl font-bold">{invoice.invoiceNumber}</h1>
           <p className="text-muted-foreground">{invoice.client.name}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <InvoiceStatusToggle
             invoiceId={invoice.id}
             currentStatus={invoice.status}

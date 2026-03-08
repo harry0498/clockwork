@@ -71,7 +71,7 @@ export function ActionMenu({ items }: { items: ActionMenuItem[] }) {
         ref={triggerRef}
         type="button"
         onClick={toggle}
-        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
       >
         <svg
           className="h-4 w-4"
@@ -99,7 +99,7 @@ export function ActionMenu({ items }: { items: ActionMenuItem[] }) {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`block px-3 py-1.5 text-sm hover:bg-muted ${item.variant === "destructive" ? "text-destructive" : ""}`}
+                  className={`block px-3 py-2 text-sm hover:bg-muted ${item.variant === "destructive" ? "text-destructive" : ""}`}
                   onClick={() => setOpen(false)}
                 >
                   {item.label}
@@ -109,7 +109,7 @@ export function ActionMenu({ items }: { items: ActionMenuItem[] }) {
                   key={item.label}
                   type="button"
                   onClick={() => handleClick(item)}
-                  className={`w-full px-3 py-1.5 text-left text-sm hover:bg-muted ${item.variant === "destructive" ? "text-destructive" : ""}`}
+                  className={`w-full px-3 py-2 text-left text-sm hover:bg-muted ${item.variant === "destructive" ? "text-destructive" : ""}`}
                 >
                   {item.label}
                 </button>

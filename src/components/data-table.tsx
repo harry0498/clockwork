@@ -12,6 +12,7 @@ export interface Column<T> {
   accessor: keyof T | ((row: T) => ReactNode);
   align?: "left" | "right" | "center";
   className?: string;
+  hideOnMobile?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -50,7 +51,7 @@ export function DataTable<T>({
             {allColumns.map((col, i) => (
               <th
                 key={colKey(col, i)}
-                className={`px-4 py-3 font-medium ${alignClass[col.align ?? "left"]} ${col.className ?? ""}`}
+                className={`px-4 py-3 font-medium ${alignClass[col.align ?? "left"]} ${col.className ?? ""} ${col.hideOnMobile ? "hidden md:table-cell" : ""}`}
               >
                 {col.header}
               </th>
@@ -71,7 +72,7 @@ export function DataTable<T>({
                 return (
                   <td
                     key={colKey(col, i)}
-                    className={`px-4 py-3 ${alignClass[col.align ?? "left"]} ${col.className ?? ""}`}
+                    className={`px-4 py-3 ${alignClass[col.align ?? "left"]} ${col.className ?? ""} ${col.hideOnMobile ? "hidden md:table-cell" : ""}`}
                   >
                     {content}
                   </td>

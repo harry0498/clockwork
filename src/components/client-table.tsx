@@ -22,6 +22,7 @@ export function ClientTable({ clients }: { clients: ClientWithStats[] }) {
       accessor: (c) => (
         <span className="text-muted-foreground">{c.email || "\u2014"}</span>
       ),
+      hideOnMobile: true,
     },
     {
       header: "Total Hours",
@@ -37,6 +38,7 @@ export function ClientTable({ clients }: { clients: ClientWithStats[] }) {
       header: "Unbilled",
       accessor: (c) => formatGBP(c.unbilledAmount),
       align: "right",
+      hideOnMobile: true,
     },
   ];
 
