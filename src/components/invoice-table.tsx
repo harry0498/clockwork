@@ -1,0 +1,103 @@
+"use client";
+
+import Link from "next/link";
+import { deleteInvoice } from "@/actions/invoices";
+import { ActionMenu } from "@/components/action-menu";
+import { type Column, DataTable } from "@/components/data-table";
+import { formatGBP } from "@/lib/tax-year";
+import type { InvoiceWithClient } from "@/lib/types";
+
+const statusColors: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground",
+  sent: "bg-blue-100 text-blue-800",
+  paid: "bg-green-100 text-green-800",
+};
+
+async function downloadInvoicePdf(invoiceId: string) {
+  const res = await fetch(`/api/invoices/${invoiceId}/pdf`);
+  if (!res.ok) throw new Error("Failed to download PDF");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const disposition = res.headers.get("Content-Disposition");
+  const filenameMatch = disposition?.match(/filename="?(.+?)"?$/);
+  a.download = filenameMatch?.[1] ?? `invoice-${invoiceId}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export function InvoiceTable({ invoices }: { invoices: InvoiceWithClient[] }) {
+  const columns: Column<InvoiceWithClient>[] = [
+    {
+      header: "Number",
+      accessor: (inv) => (
+        <Link
+          href={`/invoices/${inv.id}`}
+          className="font-medium hover:underline"
+        >
+          {inv.invoiceNumber}
+        </Link>
+      ),
+    },
+    { header: "Client", accessor: (inv) => inv.client.name },
+    { header: "Date", accessor: "issuedAt" },
+    {
+      header: "Total",
+      accessor: (inv) => formatGBP(inv.totalAmount),
+      align: "right",
+      className: "font-medium",
+    },
+    {
+      header: "Status",
+      align: "center",
+      accessor: (inv) => (
+        <span
+          className={`inline-block rounded-full px-2 py-0.5 text-xs capitalize ${statusColors[inv.status]}`}
+        >
+          {inv.status}
+        </span>
+      ),
+    },
+  ];
+
+  return (
+    <DataTable
+      columns={columns}
+      data={invoices}
+      keyExtractor={(inv) => inv.id}
+      actions={(inv) => (
+        <ActionMenu
+          items={[
+            { label: "View", href: `/invoices/${inv.id}` },
+            {
+              label: "Download PDF",
+              onClick: () => downloadInvoicePdf(inv.id),
+            },
+            {
+              label: "Delete",
+              onClick: () => deleteInvoice(inv.id),
+              variant: "destructive",
+              confirm:
+                "Delete this invoice? Linked time entries will be unlinked.",
+            },
+          ]}
+        />
+      )}
+    />
+  );
+}
+
+export function DownloadPdfButton({ invoiceId }: { invoiceId: string }) {
+  return (
+    <button
+      type="button"
+      onClick={() => downloadInvoicePdf(invoiceId)}
+      className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent"
+    >
+      Download PDF
+    </button>
+  );
+}

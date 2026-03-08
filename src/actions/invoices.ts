@@ -107,6 +107,26 @@ export async function getInvoice(id: string) {
   });
 }
 
+export async function deleteInvoice(id: string) {
+  const session = await requireSession();
+
+  await db.transaction(async (tx) => {
+    // Unlink time entries first
+    await tx
+      .update(timeEntries)
+      .set({ invoiceId: null })
+      .where(eq(timeEntries.invoiceId, id));
+
+    await tx
+      .delete(invoices)
+      .where(and(eq(invoices.id, id), eq(invoices.userId, session.user.id)));
+  });
+
+  revalidatePath("/invoices");
+  revalidatePath("/entries");
+  revalidatePath("/");
+}
+
 export async function updateInvoiceStatus(
   id: string,
   status: "draft" | "sent" | "paid",

@@ -19,6 +19,7 @@ interface DataTableProps<T> {
   data: T[];
   keyExtractor: (row: T) => string;
   footer?: ReactNode;
+  actions?: (row: T) => ReactNode;
 }
 
 function colKey<T>(col: Column<T>, index: number): string {
@@ -32,13 +33,21 @@ export function DataTable<T>({
   data,
   keyExtractor,
   footer,
+  actions,
 }: DataTableProps<T>) {
+  const allColumns: Column<T>[] = actions
+    ? [
+        ...columns,
+        { key: "actions", header: "", align: "right", accessor: actions },
+      ]
+    : columns;
+
   return (
     <div className="overflow-x-auto rounded-md border border-border">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/50">
-            {columns.map((col, i) => (
+            {allColumns.map((col, i) => (
               <th
                 key={colKey(col, i)}
                 className={`px-4 py-3 font-medium ${alignClass[col.align ?? "left"]} ${col.className ?? ""}`}
@@ -54,7 +63,7 @@ export function DataTable<T>({
               key={keyExtractor(row)}
               className="border-b border-border last:border-0"
             >
-              {columns.map((col, i) => {
+              {allColumns.map((col, i) => {
                 const content =
                   typeof col.accessor === "function"
                     ? col.accessor(row)

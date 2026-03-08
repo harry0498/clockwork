@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getInvoice } from "@/actions/invoices";
 import { DataTable } from "@/components/data-table";
 import { InvoiceStatusToggle } from "@/components/invoice-status-toggle";
+import { DownloadPdfButton } from "@/components/invoice-table";
 import { calculateAmount, formatGBP, formatMinutes } from "@/lib/tax-year";
 
 export default async function InvoiceDetailPage({
@@ -28,12 +29,7 @@ export default async function InvoiceDetailPage({
             invoiceId={invoice.id}
             currentStatus={invoice.status}
           />
-          <a
-            href={`/api/invoices/${invoice.id}/pdf`}
-            className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent"
-          >
-            Download PDF
-          </a>
+          <DownloadPdfButton invoiceId={invoice.id} />
         </div>
       </div>
 
