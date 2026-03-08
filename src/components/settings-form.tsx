@@ -2,20 +2,24 @@
 
 import { useState } from "react";
 import { updateProfile } from "@/actions/settings";
+import { Alert } from "@/components/alert";
+import { inputClassName } from "@/lib/constants";
+import type { User } from "@/lib/types";
 
 interface SettingsFormProps {
-  profile: {
-    name: string;
-    email: string;
-    addressLine1: string | null;
-    addressLine2: string | null;
-    county: string | null;
-    postcode: string | null;
-    mobile: string | null;
-    bankName: string | null;
-    accountNumber: string | null;
-    sortCode: string | null;
-  };
+  profile: Pick<
+    User,
+    | "name"
+    | "email"
+    | "addressLine1"
+    | "addressLine2"
+    | "county"
+    | "postcode"
+    | "mobile"
+    | "bankName"
+    | "accountNumber"
+    | "sortCode"
+  >;
 }
 
 export function SettingsForm({ profile }: SettingsFormProps) {
@@ -40,21 +44,10 @@ export function SettingsForm({ profile }: SettingsFormProps) {
     }
   }
 
-  const inputClass =
-    "w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-500/10 text-green-700 dark:text-green-400 text-sm p-3 rounded-md">
-          {success}
-        </div>
-      )}
+      {error && <Alert message={error} variant="error" />}
+      {success && <Alert message={success} variant="success" />}
 
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">Profile</h2>
@@ -70,7 +63,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             required
             maxLength={255}
             defaultValue={profile.name}
-            className={inputClass}
+            className={inputClassName}
           />
         </div>
 
@@ -89,7 +82,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             type="tel"
             maxLength={20}
             defaultValue={profile.mobile ?? ""}
-            className={inputClass}
+            className={inputClassName}
           />
         </div>
       </div>
@@ -107,7 +100,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             type="text"
             maxLength={255}
             defaultValue={profile.addressLine1 ?? ""}
-            className={inputClass}
+            className={inputClassName}
           />
         </div>
 
@@ -121,7 +114,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             type="text"
             maxLength={255}
             defaultValue={profile.addressLine2 ?? ""}
-            className={inputClass}
+            className={inputClassName}
           />
         </div>
 
@@ -136,7 +129,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
               type="text"
               maxLength={100}
               defaultValue={profile.county ?? ""}
-              className={inputClass}
+              className={inputClassName}
             />
           </div>
 
@@ -150,7 +143,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
               type="text"
               maxLength={20}
               defaultValue={profile.postcode ?? ""}
-              className={inputClass}
+              className={inputClassName}
             />
           </div>
         </div>
@@ -169,7 +162,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             type="text"
             maxLength={100}
             defaultValue={profile.bankName ?? ""}
-            className={inputClass}
+            className={inputClassName}
           />
         </div>
 
@@ -184,7 +177,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
               type="text"
               maxLength={20}
               defaultValue={profile.accountNumber ?? ""}
-              className={inputClass}
+              className={inputClassName}
             />
           </div>
 
@@ -198,7 +191,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
               type="text"
               maxLength={10}
               defaultValue={profile.sortCode ?? ""}
-              className={inputClass}
+              className={inputClassName}
             />
           </div>
         </div>

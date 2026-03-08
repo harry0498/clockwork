@@ -3,13 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createEntry } from "@/actions/entries";
+import { Alert } from "@/components/alert";
+import { inputClassName } from "@/lib/constants";
+import { todayISO } from "@/lib/tax-year";
+import type { ClientPick } from "@/lib/types";
 
-interface Client {
-  id: string;
-  name: string;
-}
-
-export function QuickLog({ clients }: { clients: Client[] }) {
+export function QuickLog({ clients }: { clients: ClientPick[] }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,7 +32,7 @@ export function QuickLog({ clients }: { clients: Client[] }) {
     }
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayISO();
 
   if (clients.length === 0) {
     return (
@@ -45,17 +44,9 @@ export function QuickLog({ clients }: { clients: Client[] }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      {error && (
-        <div className="bg-destructive/10 text-destructive text-sm p-2 rounded-md">
-          {error}
-        </div>
-      )}
+      {error && <Alert message={error} variant="error" />}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <select
-          name="clientId"
-          required
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-        >
+        <select name="clientId" required className={inputClassName}>
           <option value="">Client</option>
           {clients.map((c) => (
             <option key={c.id} value={c.id}>
@@ -68,7 +59,7 @@ export function QuickLog({ clients }: { clients: Client[] }) {
           type="text"
           required
           placeholder="What did you work on?"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
         <input
           name="minutes"
@@ -76,7 +67,7 @@ export function QuickLog({ clients }: { clients: Client[] }) {
           required
           min={1}
           placeholder="Minutes"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
         <input
           name="ratePerHour"
@@ -86,7 +77,7 @@ export function QuickLog({ clients }: { clients: Client[] }) {
           placeholder="£/hr"
           value={rate}
           onChange={(e) => setRate(e.target.value)}
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
       </div>
       <input name="date" type="hidden" value={today} />

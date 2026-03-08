@@ -55,3 +55,11 @@ export function formatGBP(amount: number | string): string {
   const num = typeof amount === "string" ? Number.parseFloat(amount) : amount;
   return `£${num.toFixed(2)}`;
 }
+
+export function calculateAmount(minutes: number, ratePerHour: string): number {
+  return (minutes / 60) * Number.parseFloat(ratePerHour);
+}
+
+export function todayISO(): string {
+  return new Date().toISOString().split("T")[0];
+}

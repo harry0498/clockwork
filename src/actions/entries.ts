@@ -63,19 +63,20 @@ export async function getEntry(id: string) {
   });
 }
 
-export async function createEntry(formData: FormData) {
-  const session = await requireSession();
-
-  const raw = {
+function extractEntryFields(formData: FormData) {
+  return entrySchema.parse({
     clientId: formData.get("clientId") as string,
     title: formData.get("title") as string,
     notes: formData.get("notes") as string,
     minutes: formData.get("minutes") as string,
     ratePerHour: formData.get("ratePerHour") as string,
     date: formData.get("date") as string,
-  };
+  });
+}
 
-  const data = entrySchema.parse(raw);
+export async function createEntry(formData: FormData) {
+  const session = await requireSession();
+  const data = extractEntryFields(formData);
 
   await db.insert(timeEntries).values({
     userId: session.user.id,
@@ -93,17 +94,7 @@ export async function createEntry(formData: FormData) {
 
 export async function updateEntry(id: string, formData: FormData) {
   const session = await requireSession();
-
-  const raw = {
-    clientId: formData.get("clientId") as string,
-    title: formData.get("title") as string,
-    notes: formData.get("notes") as string,
-    minutes: formData.get("minutes") as string,
-    ratePerHour: formData.get("ratePerHour") as string,
-    date: formData.get("date") as string,
-  };
-
-  const data = entrySchema.parse(raw);
+  const data = extractEntryFields(formData);
 
   await db
     .update(timeEntries)

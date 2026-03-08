@@ -22,7 +22,3 @@ export function checkRateLimit(key: string): {
   record.count++;
   return { allowed: true, remaining: MAX_ATTEMPTS - record.count };
 }
-
-export function resetRateLimit(key: string): void {
-  attempts.delete(key);
-}

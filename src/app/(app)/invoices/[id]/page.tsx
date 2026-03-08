@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { getInvoice } from "@/actions/invoices";
+import { DataTable } from "@/components/data-table";
 import { InvoiceStatusToggle } from "@/components/invoice-status-toggle";
-import { formatGBP, formatMinutes } from "@/lib/tax-year";
+import { calculateAmount, formatGBP, formatMinutes } from "@/lib/tax-year";
 
 export default async function InvoiceDetailPage({
   params,
@@ -74,53 +75,41 @@ export default async function InvoiceDetailPage({
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-md border border-border">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="px-4 py-3 text-left font-medium">Date</th>
-              <th className="px-4 py-3 text-left font-medium">Description</th>
-              <th className="px-4 py-3 text-right font-medium">Time</th>
-              <th className="px-4 py-3 text-right font-medium">Rate</th>
-              <th className="px-4 py-3 text-right font-medium">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoice.timeEntries.map((entry) => {
-              const amount =
-                (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
-              return (
-                <tr
-                  key={entry.id}
-                  className="border-b border-border last:border-0"
-                >
-                  <td className="px-4 py-3">{entry.date}</td>
-                  <td className="px-4 py-3">{entry.title}</td>
-                  <td className="px-4 py-3 text-right">
-                    {formatMinutes(entry.minutes)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {formatGBP(entry.ratePerHour)}/hr
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium">
-                    {formatGBP(amount)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-          <tfoot>
-            <tr className="border-t border-border bg-muted/50">
-              <td colSpan={4} className="px-4 py-3 text-right font-bold">
-                Total
-              </td>
-              <td className="px-4 py-3 text-right font-bold">
-                {formatGBP(invoice.totalAmount)}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+      <DataTable
+        columns={[
+          { header: "Date", accessor: "date" },
+          { header: "Description", accessor: "title" },
+          {
+            header: "Time",
+            accessor: (e) => formatMinutes(e.minutes),
+            align: "right",
+          },
+          {
+            header: "Rate",
+            accessor: (e) => `${formatGBP(e.ratePerHour)}/hr`,
+            align: "right",
+          },
+          {
+            header: "Amount",
+            accessor: (e) =>
+              formatGBP(calculateAmount(e.minutes, e.ratePerHour)),
+            align: "right",
+            className: "font-medium",
+          },
+        ]}
+        data={invoice.timeEntries}
+        keyExtractor={(e) => e.id}
+        footer={
+          <tr className="border-t border-border bg-muted/50">
+            <td colSpan={4} className="px-4 py-3 text-right font-bold">
+              Total
+            </td>
+            <td className="px-4 py-3 text-right font-bold">
+              {formatGBP(invoice.totalAmount)}
+            </td>
+          </tr>
+        }
+      />
     </div>
   );
 }

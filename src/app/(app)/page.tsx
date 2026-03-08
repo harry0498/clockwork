@@ -2,13 +2,17 @@ import Link from "next/link";
 import { getClients } from "@/actions/clients";
 import { getDashboardStats, getOnboardingStatus } from "@/actions/dashboard";
 import { getEntries } from "@/actions/entries";
+import { DataTable } from "@/components/data-table";
+import { EmptyState } from "@/components/empty-state";
 import { QuickLog } from "@/components/quick-log";
 import {
+  calculateAmount,
   formatGBP,
   formatMinutes,
   getCurrentTaxYearStart,
   getTaxYearBounds,
 } from "@/lib/tax-year";
+import type { TimeEntryWithClient } from "@/lib/types";
 
 export default async function DashboardPage() {
   const onboarding = await getOnboardingStatus();
@@ -93,51 +97,32 @@ export default async function DashboardPage() {
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Recent Entries</h2>
         {recentEntries.length === 0 ? (
-          <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
-            <p className="text-muted-foreground">Ready to track some time?</p>
-            <Link
-              href="/entries/new"
-              className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-            >
-              Log Time
-            </Link>
-          </div>
+          <EmptyState
+            message="Ready to track some time?"
+            actionLabel="Log Time"
+            actionHref="/entries/new"
+          />
         ) : (
-          <div className="overflow-x-auto rounded-md border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/50">
-                  <th className="px-4 py-2 text-left font-medium">Date</th>
-                  <th className="px-4 py-2 text-left font-medium">Client</th>
-                  <th className="px-4 py-2 text-left font-medium">Title</th>
-                  <th className="px-4 py-2 text-right font-medium">Time</th>
-                  <th className="px-4 py-2 text-right font-medium">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentEntries.map((entry) => {
-                  const amount =
-                    (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
-                  return (
-                    <tr
-                      key={entry.id}
-                      className="border-b border-border last:border-0"
-                    >
-                      <td className="px-4 py-2">{entry.date}</td>
-                      <td className="px-4 py-2">{entry.client.name}</td>
-                      <td className="px-4 py-2">{entry.title}</td>
-                      <td className="px-4 py-2 text-right">
-                        {formatMinutes(entry.minutes)}
-                      </td>
-                      <td className="px-4 py-2 text-right">
-                        {formatGBP(amount)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <DataTable<TimeEntryWithClient>
+            columns={[
+              { header: "Date", accessor: "date" },
+              { header: "Client", accessor: (e) => e.client.name },
+              { header: "Title", accessor: "title" },
+              {
+                header: "Time",
+                accessor: (e) => formatMinutes(e.minutes),
+                align: "right",
+              },
+              {
+                header: "Amount",
+                accessor: (e) =>
+                  formatGBP(calculateAmount(e.minutes, e.ratePerHour)),
+                align: "right",
+              },
+            ]}
+            data={recentEntries}
+            keyExtractor={(e) => e.id}
+          />
         )}
       </div>
     </div>

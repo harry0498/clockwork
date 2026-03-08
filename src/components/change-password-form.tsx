@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { changePassword } from "@/actions/settings";
+import { Alert } from "@/components/alert";
+import { inputClassName } from "@/lib/constants";
 
 export function ChangePasswordForm() {
   const formRef = useRef<HTMLFormElement>(null);
@@ -27,21 +29,10 @@ export function ChangePasswordForm() {
     }
   }
 
-  const inputClass =
-    "w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
-
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-500/10 text-green-700 dark:text-green-400 text-sm p-3 rounded-md">
-          {success}
-        </div>
-      )}
+      {error && <Alert message={error} variant="error" />}
+      {success && <Alert message={success} variant="success" />}
 
       <div className="space-y-2">
         <label htmlFor="currentPassword" className="text-sm font-medium">
@@ -52,7 +43,7 @@ export function ChangePasswordForm() {
           name="currentPassword"
           type="password"
           required
-          className={inputClass}
+          className={inputClassName}
         />
       </div>
 
@@ -66,7 +57,7 @@ export function ChangePasswordForm() {
           type="password"
           required
           minLength={8}
-          className={inputClass}
+          className={inputClassName}
         />
       </div>
 
@@ -79,7 +70,7 @@ export function ChangePasswordForm() {
           name="confirmPassword"
           type="password"
           required
-          className={inputClass}
+          className={inputClassName}
         />
       </div>
 

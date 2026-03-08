@@ -3,18 +3,22 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient, updateClient } from "@/actions/clients";
+import { Alert } from "@/components/alert";
+import { inputClassName } from "@/lib/constants";
+import type { Client } from "@/lib/types";
 
 interface ClientFormProps {
-  client?: {
-    id: string;
-    name: string;
-    email: string | null;
-    addressLine1: string;
-    addressLine2: string | null;
-    county: string;
-    postcode: string;
-    vatNumber: string | null;
-  };
+  client?: Pick<
+    Client,
+    | "id"
+    | "name"
+    | "email"
+    | "addressLine1"
+    | "addressLine2"
+    | "county"
+    | "postcode"
+    | "vatNumber"
+  >;
 }
 
 export function ClientForm({ client }: ClientFormProps) {
@@ -45,11 +49,7 @@ export function ClientForm({ client }: ClientFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md space-y-4">
-      {error && (
-        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-          {error}
-        </div>
-      )}
+      {error && <Alert message={error} variant="error" />}
 
       <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium">
@@ -62,7 +62,7 @@ export function ClientForm({ client }: ClientFormProps) {
           required
           maxLength={200}
           defaultValue={client?.name ?? ""}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
       </div>
 
@@ -75,7 +75,7 @@ export function ClientForm({ client }: ClientFormProps) {
           name="email"
           type="email"
           defaultValue={client?.email ?? ""}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
       </div>
 
@@ -90,7 +90,7 @@ export function ClientForm({ client }: ClientFormProps) {
           required
           maxLength={255}
           defaultValue={client?.addressLine1 ?? ""}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
       </div>
 
@@ -104,7 +104,7 @@ export function ClientForm({ client }: ClientFormProps) {
           type="text"
           maxLength={255}
           defaultValue={client?.addressLine2 ?? ""}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
       </div>
 
@@ -120,7 +120,7 @@ export function ClientForm({ client }: ClientFormProps) {
             required
             maxLength={100}
             defaultValue={client?.county ?? ""}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            className={inputClassName}
           />
         </div>
 
@@ -135,7 +135,7 @@ export function ClientForm({ client }: ClientFormProps) {
             required
             maxLength={20}
             defaultValue={client?.postcode ?? ""}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            className={inputClassName}
           />
         </div>
       </div>
@@ -150,7 +150,7 @@ export function ClientForm({ client }: ClientFormProps) {
           type="text"
           maxLength={50}
           defaultValue={client?.vatNumber ?? ""}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
       </div>
 

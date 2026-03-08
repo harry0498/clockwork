@@ -3,31 +3,33 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createInvoice } from "@/actions/invoices";
-import { formatGBP, formatMinutes } from "@/lib/tax-year";
+import { Alert } from "@/components/alert";
+import { type Column, DataTable } from "@/components/data-table";
+import { EmptyState } from "@/components/empty-state";
+import { inputClassName } from "@/lib/constants";
+import {
+  calculateAmount,
+  formatGBP,
+  formatMinutes,
+  todayISO,
+} from "@/lib/tax-year";
+import type { ClientPick, TimeEntry } from "@/lib/types";
 
-interface Client {
-  id: string;
-  name: string;
-}
-
-interface Entry {
-  id: string;
-  title: string;
-  minutes: number;
-  ratePerHour: string;
-  date: string;
-}
+type InvoiceEntry = Pick<
+  TimeEntry,
+  "id" | "title" | "minutes" | "ratePerHour" | "date"
+>;
 
 export function InvoiceBuilder({
   clients,
   getEntriesForClient,
 }: {
-  clients: Client[];
-  getEntriesForClient: (clientId: string) => Promise<Entry[]>;
+  clients: ClientPick[];
+  getEntriesForClient: (clientId: string) => Promise<InvoiceEntry[]>;
 }) {
   const router = useRouter();
   const [clientId, setClientId] = useState("");
-  const [entries, setEntries] = useState<Entry[]>([]);
+  const [entries, setEntries] = useState<InvoiceEntry[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -66,7 +68,7 @@ export function InvoiceBuilder({
 
   const selectedEntries = entries.filter((e) => selectedIds.has(e.id));
   const total = selectedEntries.reduce(
-    (sum, e) => sum + (e.minutes / 60) * Number.parseFloat(e.ratePerHour),
+    (sum, e) => sum + calculateAmount(e.minutes, e.ratePerHour),
     0,
   );
 
@@ -76,11 +78,10 @@ export function InvoiceBuilder({
     setLoading(true);
 
     try {
-      const today = new Date().toISOString().split("T")[0];
       await createInvoice({
         clientId,
         entryIds: Array.from(selectedIds),
-        issuedAt: today,
+        issuedAt: todayISO(),
       });
       router.push("/invoices");
       router.refresh();
@@ -92,11 +93,7 @@ export function InvoiceBuilder({
 
   return (
     <div className="space-y-6">
-      {error && (
-        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-          {error}
-        </div>
-      )}
+      {error && <Alert message={error} variant="error" />}
 
       <div className="max-w-xs space-y-2">
         <label htmlFor="clientId" className="text-sm font-medium">
@@ -106,7 +103,7 @@ export function InvoiceBuilder({
           id="clientId"
           value={clientId}
           onChange={(e) => setClientId(e.target.value)}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         >
           <option value="">Select a client</option>
           {clients.map((c) => (
@@ -119,59 +116,11 @@ export function InvoiceBuilder({
 
       {entries.length > 0 && (
         <>
-          <div className="overflow-x-auto rounded-md border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/50">
-                  <th className="px-4 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.size === entries.length}
-                      onChange={toggleAll}
-                      className="rounded"
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium">Date</th>
-                  <th className="px-4 py-3 text-left font-medium">Title</th>
-                  <th className="px-4 py-3 text-right font-medium">Time</th>
-                  <th className="px-4 py-3 text-right font-medium">Rate</th>
-                  <th className="px-4 py-3 text-right font-medium">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entries.map((entry) => {
-                  const amount =
-                    (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
-                  return (
-                    <tr
-                      key={entry.id}
-                      className="border-b border-border last:border-0"
-                    >
-                      <td className="px-4 py-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(entry.id)}
-                          onChange={() => toggleEntry(entry.id)}
-                          className="rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-3">{entry.date}</td>
-                      <td className="px-4 py-3">{entry.title}</td>
-                      <td className="px-4 py-3 text-right">
-                        {formatMinutes(entry.minutes)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {formatGBP(entry.ratePerHour)}/hr
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium">
-                        {formatGBP(amount)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={invoiceColumns(selectedIds, toggleAll, toggleEntry)}
+            data={entries}
+            keyExtractor={(e) => e.id}
+          />
 
           <div className="flex items-center justify-between rounded-lg border border-border p-4">
             <div>
@@ -193,18 +142,58 @@ export function InvoiceBuilder({
       )}
 
       {clientId && entries.length === 0 && (
-        <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
-          <p className="text-muted-foreground">
-            All caught up -- no unbilled time for this client.
-          </p>
-          <a
-            href="/entries/new"
-            className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-          >
-            Log Time
-          </a>
-        </div>
+        <EmptyState
+          message="All caught up -- no unbilled time for this client."
+          actionLabel="Log Time"
+          actionHref="/entries/new"
+        />
       )}
     </div>
   );
+}
+
+function invoiceColumns(
+  selectedIds: Set<string>,
+  toggleAll: () => void,
+  toggleEntry: (id: string) => void,
+): Column<InvoiceEntry>[] {
+  return [
+    {
+      key: "select",
+      header: (
+        <input
+          type="checkbox"
+          checked={selectedIds.size > 0}
+          onChange={toggleAll}
+          className="rounded"
+        />
+      ),
+      accessor: (entry) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.has(entry.id)}
+          onChange={() => toggleEntry(entry.id)}
+          className="rounded"
+        />
+      ),
+    },
+    { header: "Date", accessor: "date" },
+    { header: "Title", accessor: "title" },
+    {
+      header: "Time",
+      accessor: (e) => formatMinutes(e.minutes),
+      align: "right",
+    },
+    {
+      header: "Rate",
+      accessor: (e) => `${formatGBP(e.ratePerHour)}/hr`,
+      align: "right",
+    },
+    {
+      header: "Amount",
+      accessor: (e) => formatGBP(calculateAmount(e.minutes, e.ratePerHour)),
+      align: "right",
+      className: "font-medium",
+    },
+  ];
 }

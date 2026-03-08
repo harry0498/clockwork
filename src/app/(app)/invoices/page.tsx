@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getInvoices } from "@/actions/invoices";
+import { DataTable } from "@/components/data-table";
+import { EmptyState } from "@/components/empty-state";
 import { TaxYearFilter } from "@/components/tax-year-filter";
 import { formatGBP, getCurrentTaxYearStart } from "@/lib/tax-year";
 
@@ -36,58 +38,48 @@ export default async function InvoicesPage({
       <TaxYearFilter basePath="/invoices" />
 
       {invoiceList.length === 0 ? (
-        <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
-          <p className="text-muted-foreground">No invoices yet.</p>
-          <Link
-            href="/invoices/new"
-            className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-          >
-            Create Invoice
-          </Link>
-        </div>
+        <EmptyState
+          message="No invoices yet."
+          actionLabel="Create Invoice"
+          actionHref="/invoices/new"
+        />
       ) : (
-        <div className="overflow-x-auto rounded-md border border-border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium">Number</th>
-                <th className="px-4 py-3 text-left font-medium">Client</th>
-                <th className="px-4 py-3 text-left font-medium">Date</th>
-                <th className="px-4 py-3 text-right font-medium">Total</th>
-                <th className="px-4 py-3 text-center font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoiceList.map((inv) => (
-                <tr
-                  key={inv.id}
-                  className="border-b border-border last:border-0"
+        <DataTable
+          columns={[
+            {
+              header: "Number",
+              accessor: (inv) => (
+                <Link
+                  href={`/invoices/${inv.id}`}
+                  className="font-medium hover:underline"
                 >
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/invoices/${inv.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {inv.invoiceNumber}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3">{inv.client.name}</td>
-                  <td className="px-4 py-3">{inv.issuedAt}</td>
-                  <td className="px-4 py-3 text-right font-medium">
-                    {formatGBP(inv.totalAmount)}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <span
-                      className={`inline-block rounded-full px-2 py-0.5 text-xs capitalize ${statusColors[inv.status]}`}
-                    >
-                      {inv.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  {inv.invoiceNumber}
+                </Link>
+              ),
+            },
+            { header: "Client", accessor: (inv) => inv.client.name },
+            { header: "Date", accessor: "issuedAt" },
+            {
+              header: "Total",
+              accessor: (inv) => formatGBP(inv.totalAmount),
+              align: "right",
+              className: "font-medium",
+            },
+            {
+              header: "Status",
+              align: "center",
+              accessor: (inv) => (
+                <span
+                  className={`inline-block rounded-full px-2 py-0.5 text-xs capitalize ${statusColors[inv.status]}`}
+                >
+                  {inv.status}
+                </span>
+              ),
+            },
+          ]}
+          data={invoiceList}
+          keyExtractor={(inv) => inv.id}
+        />
       )}
     </div>
   );

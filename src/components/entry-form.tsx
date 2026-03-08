@@ -3,23 +3,17 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createEntry, updateEntry } from "@/actions/entries";
-
-interface Client {
-  id: string;
-  name: string;
-}
+import { Alert } from "@/components/alert";
+import { inputClassName } from "@/lib/constants";
+import { todayISO } from "@/lib/tax-year";
+import type { ClientPick, TimeEntry } from "@/lib/types";
 
 interface EntryFormProps {
-  clients: Client[];
-  entry?: {
-    id: string;
-    clientId: string;
-    title: string;
-    notes: string | null;
-    minutes: number;
-    ratePerHour: string;
-    date: string;
-  };
+  clients: ClientPick[];
+  entry?: Pick<
+    TimeEntry,
+    "id" | "clientId" | "title" | "notes" | "minutes" | "ratePerHour" | "date"
+  >;
 }
 
 export function EntryForm({ clients, entry }: EntryFormProps) {
@@ -49,15 +43,11 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
     }
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayISO();
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md space-y-4">
-      {error && (
-        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-          {error}
-        </div>
-      )}
+      {error && <Alert message={error} variant="error" />}
 
       <div className="space-y-2">
         <label htmlFor="clientId" className="text-sm font-medium">
@@ -68,7 +58,7 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
           name="clientId"
           required
           defaultValue={entry?.clientId ?? ""}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         >
           <option value="">Select a client</option>
           {clients.map((c) => (
@@ -90,7 +80,7 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
           required
           maxLength={200}
           defaultValue={entry?.title ?? ""}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
       </div>
 
@@ -120,7 +110,7 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
             min={1}
             max={1440}
             defaultValue={entry?.minutes ?? ""}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            className={inputClassName}
           />
         </div>
 
@@ -136,7 +126,7 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
             required
             value={rate}
             onChange={(e) => setRate(e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            className={inputClassName}
           />
         </div>
       </div>
@@ -151,7 +141,7 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
           type="date"
           required
           defaultValue={entry?.date ?? today}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className={inputClassName}
         />
       </div>
 

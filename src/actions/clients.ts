@@ -48,10 +48,8 @@ export async function getClient(id: string) {
   });
 }
 
-export async function createClient(formData: FormData) {
-  const session = await requireSession();
-
-  const raw = {
+function extractClientFields(formData: FormData) {
+  return clientSchema.parse({
     name: formData.get("name") as string,
     email: formData.get("email") as string,
     addressLine1: formData.get("addressLine1") as string,
@@ -59,12 +57,11 @@ export async function createClient(formData: FormData) {
     county: formData.get("county") as string,
     postcode: formData.get("postcode") as string,
     vatNumber: formData.get("vatNumber") as string,
-  };
+  });
+}
 
-  const data = clientSchema.parse(raw);
-
-  await db.insert(clients).values({
-    userId: session.user.id,
+function clientFieldsToValues(data: ReturnType<typeof extractClientFields>) {
+  return {
     name: data.name,
     email: data.email || null,
     addressLine1: data.addressLine1,
@@ -72,6 +69,16 @@ export async function createClient(formData: FormData) {
     county: data.county,
     postcode: data.postcode,
     vatNumber: data.vatNumber || null,
+  };
+}
+
+export async function createClient(formData: FormData) {
+  const session = await requireSession();
+  const data = extractClientFields(formData);
+
+  await db.insert(clients).values({
+    userId: session.user.id,
+    ...clientFieldsToValues(data),
   });
 
   revalidatePath("/clients");
@@ -79,30 +86,11 @@ export async function createClient(formData: FormData) {
 
 export async function updateClient(id: string, formData: FormData) {
   const session = await requireSession();
-
-  const raw = {
-    name: formData.get("name") as string,
-    email: formData.get("email") as string,
-    addressLine1: formData.get("addressLine1") as string,
-    addressLine2: formData.get("addressLine2") as string,
-    county: formData.get("county") as string,
-    postcode: formData.get("postcode") as string,
-    vatNumber: formData.get("vatNumber") as string,
-  };
-
-  const data = clientSchema.parse(raw);
+  const data = extractClientFields(formData);
 
   await db
     .update(clients)
-    .set({
-      name: data.name,
-      email: data.email || null,
-      addressLine1: data.addressLine1,
-      addressLine2: data.addressLine2 || null,
-      county: data.county,
-      postcode: data.postcode,
-      vatNumber: data.vatNumber || null,
-    })
+    .set(clientFieldsToValues(data))
     .where(and(eq(clients.id, id), eq(clients.userId, session.user.id)));
 
   revalidatePath("/clients");
