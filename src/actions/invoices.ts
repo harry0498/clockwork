@@ -1,11 +1,13 @@
 "use server";
 
-import { and, eq, gte, like, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, like, lte, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { invoices, timeEntries } from "@/db/schema";
+import { PAGE_SIZE, type PaginatedResult } from "@/lib/pagination";
 import { requireSession } from "@/lib/session";
 import { getCurrentTaxYearStart, getTaxYearBounds } from "@/lib/tax-year";
+import type { InvoiceWithClient } from "@/lib/types";
 import { invoiceCreateSchema, invoiceStatusSchema } from "@/lib/validators";
 
 async function generateInvoiceNumber(userId: string): Promise<string> {
@@ -104,6 +106,45 @@ export async function getInvoices(taxYear?: number) {
     with: { client: true },
     orderBy: (invoices, { desc }) => [desc(invoices.createdAt)],
   });
+}
+
+export async function getInvoicesPaginated(
+  taxYear: number | undefined,
+  options: { page: number; offset: number; limit?: number },
+): Promise<PaginatedResult<InvoiceWithClient>> {
+  const session = await requireSession();
+  const year = taxYear ?? getCurrentTaxYearStart();
+  const bounds = getTaxYearBounds(year);
+
+  const whereClause = and(
+    eq(invoices.userId, session.user.id),
+    gte(invoices.issuedAt, bounds.start),
+    lte(invoices.issuedAt, bounds.end),
+  );
+
+  const limit = options.limit ?? PAGE_SIZE;
+
+  const [data, [{ count }]] = await Promise.all([
+    db.query.invoices.findMany({
+      where: whereClause,
+      with: { client: true },
+      orderBy: [desc(invoices.createdAt)],
+      limit,
+      offset: options.offset,
+    }),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(invoices)
+      .where(whereClause),
+  ]);
+
+  const total = Number(count);
+  return {
+    data: data as InvoiceWithClient[],
+    total,
+    page: options.page,
+    pageCount: Math.max(1, Math.ceil(total / limit)),
+  };
 }
 
 export async function getInvoice(id: string) {

@@ -18,7 +18,13 @@ interface ClientWithStats {
   unbilledAmount: number;
 }
 
-export function ClientsPageClient({ clients }: { clients: ClientWithStats[] }) {
+export function ClientsPageClient({
+  clients,
+  pagination,
+}: {
+  clients: ClientWithStats[];
+  pagination?: { currentPage: number; pageCount: number };
+}) {
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
   const [editClient, setEditClient] = useState<
@@ -68,6 +74,7 @@ export function ClientsPageClient({ clients }: { clients: ClientWithStats[] }) {
           clients={clients}
           onEdit={handleEdit}
           onDelete={setDeleteTarget}
+          pagination={pagination}
         />
       )}
 

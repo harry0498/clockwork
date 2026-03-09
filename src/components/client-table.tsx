@@ -18,10 +18,12 @@ export function ClientTable({
   clients,
   onEdit,
   onDelete,
+  pagination,
 }: {
   clients: ClientWithStats[];
   onEdit?: (client: ClientWithStats) => void;
   onDelete?: (client: ClientWithStats) => void;
+  pagination?: { currentPage: number; pageCount: number };
 }) {
   const columns: Column<ClientWithStats>[] = [
     {
@@ -63,6 +65,7 @@ export function ClientTable({
       columns={columns}
       data={clients}
       keyExtractor={(c) => c.id}
+      pagination={pagination}
       actions={(c) => (
         <ActionMenu
           items={[

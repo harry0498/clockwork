@@ -20,11 +20,13 @@ export function InvoicesPageClient({
   clients,
   getEntriesForClient,
   children,
+  pagination,
 }: {
   invoices: InvoiceWithClient[];
   clients: ClientPick[];
   getEntriesForClient: (clientId: string) => Promise<InvoiceEntry[]>;
   children?: React.ReactNode;
+  pagination?: { currentPage: number; pageCount: number };
 }) {
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
@@ -62,7 +64,11 @@ export function InvoicesPageClient({
           onAction={() => setCreateOpen(true)}
         />
       ) : (
-        <InvoiceTable invoices={invoices} onDelete={setDeleteTarget} />
+        <InvoiceTable
+          invoices={invoices}
+          onDelete={setDeleteTarget}
+          pagination={pagination}
+        />
       )}
 
       <InvoiceDialog

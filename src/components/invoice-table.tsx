@@ -31,9 +31,11 @@ async function downloadInvoicePdf(invoiceId: string) {
 export function InvoiceTable({
   invoices,
   onDelete,
+  pagination,
 }: {
   invoices: InvoiceWithClient[];
   onDelete?: (invoice: InvoiceWithClient) => void;
+  pagination?: { currentPage: number; pageCount: number };
 }) {
   const columns: Column<InvoiceWithClient>[] = [
     {
@@ -80,6 +82,7 @@ export function InvoiceTable({
       columns={columns}
       data={invoices}
       keyExtractor={(inv) => inv.id}
+      pagination={pagination}
       actions={(inv) => (
         <ActionMenu
           items={[

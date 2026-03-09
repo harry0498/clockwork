@@ -12,6 +12,7 @@ export function TaxYearFilter({ basePath }: { basePath: string }) {
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("taxYear", e.target.value);
+    params.delete("page");
     router.push(`${basePath}?${params.toString()}`);
   }
 

@@ -4,6 +4,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { clients, invoices, timeEntries } from "@/db/schema";
+import { PAGE_SIZE, type PaginatedResult } from "@/lib/pagination";
 import { requireSession } from "@/lib/session";
 import { type ClientInput, clientSchema } from "@/lib/validators";
 
@@ -39,6 +40,60 @@ export async function getClientsWithStats() {
     totalEarned: Number(row.totalEarned),
     unbilledAmount: Number(row.unbilledAmount),
   }));
+}
+
+interface ClientWithStats {
+  id: string;
+  name: string;
+  email: string | null;
+  totalMinutes: number;
+  totalEarned: number;
+  unbilledAmount: number;
+}
+
+export async function getClientsWithStatsPaginated(options: {
+  page: number;
+  offset: number;
+  limit?: number;
+}): Promise<PaginatedResult<ClientWithStats>> {
+  const session = await requireSession();
+  const limit = options.limit ?? PAGE_SIZE;
+
+  const [rows, [{ count }]] = await Promise.all([
+    db
+      .select({
+        id: clients.id,
+        name: clients.name,
+        email: clients.email,
+        totalMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
+        totalEarned: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
+        unbilledAmount: sql<number>`coalesce(sum(case when ${timeEntries.invoiceId} is null and ${timeEntries.manuallyInvoiced} = false then ${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0 else 0 end), 0)`,
+      })
+      .from(clients)
+      .leftJoin(timeEntries, eq(clients.id, timeEntries.clientId))
+      .where(eq(clients.userId, session.user.id))
+      .groupBy(clients.id, clients.name, clients.email)
+      .orderBy(clients.name)
+      .limit(limit)
+      .offset(options.offset),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(clients)
+      .where(eq(clients.userId, session.user.id)),
+  ]);
+
+  const total = Number(count);
+  return {
+    data: rows.map((row) => ({
+      ...row,
+      totalMinutes: Number(row.totalMinutes),
+      totalEarned: Number(row.totalEarned),
+      unbilledAmount: Number(row.unbilledAmount),
+    })),
+    total,
+    page: options.page,
+    pageCount: Math.max(1, Math.ceil(total / limit)),
+  };
 }
 
 export async function getClient(id: string) {

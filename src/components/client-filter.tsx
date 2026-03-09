@@ -21,6 +21,7 @@ export function ClientFilterClient({
     } else {
       params.delete("clientId");
     }
+    params.delete("page");
     router.push(`${basePath}?${params.toString()}`);
   }
 
