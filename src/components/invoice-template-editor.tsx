@@ -2,10 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import dynamic from "next/dynamic";
-import { memo, useCallback, useRef, useState } from "react";
+import { memo, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { updateInvoiceTemplate } from "@/actions/invoice-template";
-import { Alert } from "@/components/alert";
 
 const InvoicePdfPreview = dynamic(
   () => import("@/components/invoice-pdf-preview"),
@@ -89,8 +89,6 @@ export function InvoiceTemplateEditor({
   config,
   profile,
 }: InvoiceTemplateEditorProps) {
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const footerRef = useRef<HTMLTextAreaElement | null>(null);
 
   const {
@@ -133,13 +131,11 @@ export function InvoiceTemplateEditor({
   );
 
   const onSubmit = useCallback(async (data: InvoiceTemplateConfig) => {
-    setError("");
-    setSuccess("");
     try {
       await updateInvoiceTemplate(data);
-      setSuccess("Template saved");
+      toast.success("Template saved");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
     }
   }, []);
 
@@ -152,9 +148,6 @@ export function InvoiceTemplateEditor({
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-4 lg:flex-1 lg:overflow-y-auto lg:pb-6"
       >
-        {error && <Alert message={error} variant="error" />}
-        {success && <Alert message={success} variant="success" />}
-
         {/* Branding */}
         <Section title="Branding">
           <div className="space-y-1">

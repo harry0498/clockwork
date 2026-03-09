@@ -1,11 +1,21 @@
 import { z } from "zod";
 
-const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex colour");
+const hexColor = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/, "Please enter a valid colour (e.g. #FF0000)");
 
 export const invoiceTemplateSchema = z.object({
   // Branding
-  companyName: z.string().max(255).optional().or(z.literal("")),
-  titleText: z.string().max(50).optional().or(z.literal("")),
+  companyName: z
+    .string()
+    .max(255, "Business name must be 255 characters or fewer")
+    .optional()
+    .or(z.literal("")),
+  titleText: z
+    .string()
+    .max(50, "Title must be 50 characters or fewer")
+    .optional()
+    .or(z.literal("")),
 
   // Colours
   accentColor: hexColor,
@@ -32,7 +42,11 @@ export const invoiceTemplateSchema = z.object({
   hoursFormat: z.enum(["decimal", "hm"]),
 
   // Footer
-  footer: z.string().max(1000).optional().or(z.literal("")),
+  footer: z
+    .string()
+    .max(1000, "Footer must be 1,000 characters or fewer")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type InvoiceTemplateConfig = z.infer<typeof invoiceTemplateSchema>;

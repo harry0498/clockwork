@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { deleteClient, getClient } from "@/actions/clients";
 import { AlertDialog } from "@/components/alert-dialog";
 import { ClientDialog } from "@/components/client-dialog";
@@ -97,6 +98,7 @@ export function ClientsPageClient({
           if (deleteTarget) {
             await deleteClient(deleteTarget.id);
             router.refresh();
+            toast.success("Client deleted");
           }
         }}
       />

@@ -2,10 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { createEntry } from "@/actions/entries";
-import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
 import { todayISO } from "@/lib/tax-year";
 import type { ClientPick } from "@/lib/types";
@@ -13,7 +12,6 @@ import { type EntryInput, entrySchema } from "@/lib/validators";
 
 export function QuickLog({ clients }: { clients: ClientPick[] }) {
   const router = useRouter();
-  const [error, setError] = useState("");
 
   const today = todayISO();
 
@@ -35,7 +33,6 @@ export function QuickLog({ clients }: { clients: ClientPick[] }) {
   });
 
   async function onSubmit(data: EntryInput) {
-    setError("");
     try {
       await createEntry(data);
       reset({
@@ -47,8 +44,9 @@ export function QuickLog({ clients }: { clients: ClientPick[] }) {
         date: today,
       });
       router.refresh();
+      toast.success("Time logged");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
     }
   }
 
@@ -62,7 +60,6 @@ export function QuickLog({ clients }: { clients: ClientPick[] }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-      {error && <Alert message={error} variant="error" />}
       {(errors.clientId ||
         errors.title ||
         errors.minutes ||

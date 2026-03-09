@@ -233,7 +233,9 @@ export async function toggleManuallyInvoiced(id: string) {
   revalidatePath("/");
 }
 
-const bulkIdsSchema = z.array(z.string().uuid()).min(1);
+const bulkIdsSchema = z
+  .array(z.string().uuid())
+  .min(1, "Select at least one entry");
 
 export async function bulkMarkInvoiced(ids: string[]) {
   const session = await requireSession();

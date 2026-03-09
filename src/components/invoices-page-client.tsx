@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { deleteInvoice } from "@/actions/invoices";
 import { AlertDialog } from "@/components/alert-dialog";
 import { EmptyState } from "@/components/empty-state";
@@ -89,6 +90,7 @@ export function InvoicesPageClient({
           if (deleteTarget) {
             await deleteInvoice(deleteTarget.id);
             router.refresh();
+            toast.success("Invoice deleted");
           }
         }}
       />

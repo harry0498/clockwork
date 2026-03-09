@@ -2,10 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { createClient, updateClient } from "@/actions/clients";
-import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
 import type { Client } from "@/lib/types";
 import { type ClientInput, clientSchema } from "@/lib/validators";
@@ -28,7 +27,6 @@ export interface ClientFormProps {
 
 export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
   const router = useRouter();
-  const [error, setError] = useState("");
   const isEditing = !!client;
 
   const {
@@ -49,7 +47,6 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
   });
 
   async function onSubmit(data: ClientInput) {
-    setError("");
     try {
       if (isEditing) {
         await updateClient(client.id, data);
@@ -63,7 +60,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
         router.push(isEditing ? `/clients/${client.id}` : "/clients");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
     }
   }
 
@@ -72,8 +69,6 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
       onSubmit={handleSubmit(onSubmit)}
       className="w-full max-w-md space-y-4"
     >
-      {error && <Alert message={error} variant="error" />}
-
       <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium">
           Name *

@@ -1,10 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { updateProfile } from "@/actions/settings";
-import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
 import type { User } from "@/lib/types";
 import { type UserProfileInput, userProfileSchema } from "@/lib/validators";
@@ -26,9 +25,6 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ profile }: SettingsFormProps) {
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
   const {
     register,
     handleSubmit,
@@ -49,21 +45,16 @@ export function SettingsForm({ profile }: SettingsFormProps) {
   });
 
   async function onSubmit(data: UserProfileInput) {
-    setError("");
-    setSuccess("");
     try {
       await updateProfile(data);
-      setSuccess("Profile updated successfully");
+      toast.success("Profile updated");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
     }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {error && <Alert message={error} variant="error" />}
-      {success && <Alert message={success} variant="success" />}
-
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">Profile</h2>
 

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { deleteEntry } from "@/actions/entries";
 import { AlertDialog } from "@/components/alert-dialog";
 import { EntryDialog } from "@/components/entry-dialog";
@@ -98,6 +99,7 @@ export function EntriesPageClient({
           if (deleteTarget) {
             await deleteEntry(deleteTarget.id);
             router.refresh();
+            toast.success("Entry deleted");
           }
         }}
       />

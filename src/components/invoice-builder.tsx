@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { createInvoice } from "@/actions/invoices";
-import { Alert } from "@/components/alert";
 import { type Column, DataTable } from "@/components/data-table";
 import { EmptyState } from "@/components/empty-state";
 import { inputClassName } from "@/lib/constants";
@@ -34,7 +34,6 @@ export function InvoiceBuilder({
   const [entries, setEntries] = useState<InvoiceEntry[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!clientId) {
@@ -76,7 +75,6 @@ export function InvoiceBuilder({
 
   async function handleSubmit() {
     if (!clientId || selectedIds.size === 0) return;
-    setError("");
     setLoading(true);
 
     try {
@@ -92,15 +90,13 @@ export function InvoiceBuilder({
         router.push("/invoices");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
       setLoading(false);
     }
   }
 
   return (
     <div className="space-y-6">
-      {error && <Alert message={error} variant="error" />}
-
       <div className="w-full max-w-xs space-y-2">
         <label htmlFor="clientId" className="text-sm font-medium">
           Client

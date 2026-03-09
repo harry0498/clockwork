@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   bulkDeleteEntries,
   bulkMarkInvoiced,
@@ -88,6 +89,7 @@ export function EntryTable({
     await bulkMarkInvoiced(ids);
     setSelectedIds(new Set());
     router.refresh();
+    toast.success(`${ids.length} entries marked as invoiced`);
   }
 
   async function handleBulkUnmark() {
@@ -96,6 +98,7 @@ export function EntryTable({
     await bulkUnmarkInvoiced(ids);
     setSelectedIds(new Set());
     router.refresh();
+    toast.success(`${ids.length} entries unmarked`);
   }
 
   async function handleBulkDelete() {
@@ -104,6 +107,7 @@ export function EntryTable({
     await bulkDeleteEntries(ids);
     setSelectedIds(new Set());
     router.refresh();
+    toast.success(`${ids.length} entries deleted`);
   }
 
   if (entries.length === 0) {

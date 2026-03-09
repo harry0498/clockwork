@@ -2,10 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { createEntry, updateEntry } from "@/actions/entries";
-import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
 import { todayISO } from "@/lib/tax-year";
 import type { ClientPick, TimeEntry } from "@/lib/types";
@@ -28,7 +27,6 @@ export function EntryForm({
   onCancel,
 }: EntryFormProps) {
   const router = useRouter();
-  const [error, setError] = useState("");
   const isEditing = !!entry;
 
   const {
@@ -48,7 +46,6 @@ export function EntryForm({
   });
 
   async function onSubmit(data: EntryInput) {
-    setError("");
     try {
       if (isEditing) {
         await updateEntry(entry.id, data);
@@ -62,7 +59,7 @@ export function EntryForm({
         router.push("/entries");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
     }
   }
 
@@ -71,8 +68,6 @@ export function EntryForm({
       onSubmit={handleSubmit(onSubmit)}
       className="w-full max-w-md space-y-4"
     >
-      {error && <Alert message={error} variant="error" />}
-
       <div className="space-y-2">
         <label htmlFor="clientId" className="text-sm font-medium">
           Client *

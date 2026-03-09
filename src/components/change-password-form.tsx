@@ -1,10 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { changePassword } from "@/actions/settings";
-import { Alert } from "@/components/alert";
 import { inputClassName } from "@/lib/constants";
 import {
   type ChangePasswordInput,
@@ -12,9 +11,6 @@ import {
 } from "@/lib/validators";
 
 export function ChangePasswordForm() {
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
   const {
     register,
     handleSubmit,
@@ -30,22 +26,17 @@ export function ChangePasswordForm() {
   });
 
   async function onSubmit(data: ChangePasswordInput) {
-    setError("");
-    setSuccess("");
     try {
       await changePassword(data);
-      setSuccess("Password changed successfully");
+      toast.success("Password changed");
       reset();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
     }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {error && <Alert message={error} variant="error" />}
-      {success && <Alert message={success} variant="success" />}
-
       <div className="space-y-2">
         <label htmlFor="currentPassword" className="text-sm font-medium">
           Current Password *
