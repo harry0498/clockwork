@@ -21,12 +21,20 @@ export default async function InvoicesPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Invoices</h1>
-        <Link
-          href="/invoices/new"
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-        >
-          New Invoice
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/invoices/template"
+            className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent"
+          >
+            Customise Template
+          </Link>
+          <Link
+            href="/invoices/new"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            New Invoice
+          </Link>
+        </div>
       </div>
 
       <TaxYearFilter basePath="/invoices" />

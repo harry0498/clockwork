@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { and, eq, gte, like, lte, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { invoices, timeEntries } from "@/db/schema";
@@ -9,16 +9,26 @@ import { getCurrentTaxYearStart, getTaxYearBounds } from "@/lib/tax-year";
 import { invoiceCreateSchema, invoiceStatusSchema } from "@/lib/validators";
 
 async function generateInvoiceNumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear();
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(2);
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const prefix = `${yy}${mm}${dd}`;
+
   const [result] = await db
     .select({
       count: sql<number>`count(*)`,
     })
     .from(invoices)
-    .where(eq(invoices.userId, userId));
+    .where(
+      and(
+        eq(invoices.userId, userId),
+        like(invoices.invoiceNumber, `${prefix}%`),
+      ),
+    );
 
-  const num = Number(result.count) + 1;
-  return `CW-${year}-${num.toString().padStart(3, "0")}`;
+  const suffix = String.fromCharCode(65 + Number(result.count)); // A, B, C...
+  return `${prefix}${suffix}`;
 }
 
 export async function createInvoice(data: {

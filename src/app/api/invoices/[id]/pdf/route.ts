@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { db } from "@/db";
-import { invoices } from "@/db/schema";
+import { invoices, users } from "@/db/schema";
 import { authOptions } from "@/lib/auth";
 import { InvoicePdf } from "@/lib/invoice-pdf";
 
@@ -30,29 +30,20 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, session.user.id),
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
   const buffer = await renderToBuffer(
     InvoicePdf({
-      invoice: {
-        invoiceNumber: invoice.invoiceNumber,
-        status: invoice.status,
-        totalAmount: invoice.totalAmount,
-        issuedAt: invoice.issuedAt,
-        paidAt: invoice.paidAt,
-      },
-      client: {
-        name: invoice.client.name,
-        email: invoice.client.email,
-        addressLine1: invoice.client.addressLine1,
-        addressLine2: invoice.client.addressLine2,
-        county: invoice.client.county,
-        postcode: invoice.client.postcode,
-      },
-      entries: invoice.timeEntries.map((e) => ({
-        date: e.date,
-        title: e.title,
-        minutes: e.minutes,
-        ratePerHour: e.ratePerHour,
-      })),
+      invoice,
+      client: invoice.client,
+      entries: invoice.timeEntries,
+      user,
     }),
   );
 

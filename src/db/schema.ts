@@ -31,6 +31,7 @@ export const users = pgTable("users", {
   bankName: varchar("bank_name", { length: 100 }),
   accountNumber: varchar("account_number", { length: 20 }),
   sortCode: varchar("sort_code", { length: 10 }),
+  invoiceTemplate: text("invoice_template"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

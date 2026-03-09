@@ -1,207 +1,325 @@
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-
-const styles = StyleSheet.create({
-  page: {
-    padding: 40,
-    fontSize: 10,
-    fontFamily: "Helvetica",
-  },
-  header: {
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 24,
-    fontFamily: "Helvetica-Bold",
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 12,
-    color: "#666",
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 10,
-    color: "#999",
-    marginBottom: 4,
-    textTransform: "uppercase" as const,
-  },
-  clientName: {
-    fontSize: 12,
-    fontFamily: "Helvetica-Bold",
-    marginBottom: 2,
-  },
-  row: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    paddingVertical: 6,
-  },
-  headerRow: {
-    flexDirection: "row",
-    borderBottomWidth: 2,
-    borderBottomColor: "#333",
-    paddingBottom: 6,
-    marginBottom: 2,
-  },
-  col: {
-    flex: 1,
-  },
-  colRight: {
-    flex: 1,
-    textAlign: "right",
-  },
-  colSmall: {
-    width: 60,
-    textAlign: "right",
-  },
-  colDate: {
-    width: 70,
-  },
-  colDesc: {
-    flex: 2,
-  },
-  bold: {
-    fontFamily: "Helvetica-Bold",
-  },
-  totalRow: {
-    flexDirection: "row",
-    borderTopWidth: 2,
-    borderTopColor: "#333",
-    paddingTop: 8,
-    marginTop: 4,
-  },
-  totalLabel: {
-    flex: 3,
-    textAlign: "right",
-    fontFamily: "Helvetica-Bold",
-    fontSize: 12,
-    paddingRight: 10,
-  },
-  totalValue: {
-    width: 80,
-    textAlign: "right",
-    fontFamily: "Helvetica-Bold",
-    fontSize: 12,
-  },
-  meta: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 30,
-  },
-  metaBlock: {
-    width: "45%",
-  },
-  status: {
-    fontSize: 12,
-    fontFamily: "Helvetica-Bold",
-    textTransform: "uppercase" as const,
-    marginTop: 4,
-  },
-});
+import type { InvoiceTemplateConfig } from "@/lib/invoice-template";
+import {
+  parseTemplate,
+  resolveFooterPlaceholders,
+} from "@/lib/invoice-template";
+import type { Client, Invoice, TimeEntry, User } from "@/lib/types";
 
 function formatGBP(amount: number | string): string {
   const num = typeof amount === "string" ? Number.parseFloat(amount) : amount;
   return `£${num.toFixed(2)}`;
 }
 
-function formatMinutes(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (h === 0) return `${m}m`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}m`;
+function formatDate(dateStr: string): string {
+  const d = new Date(`${dateStr}T00:00:00`);
+  return d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
+
+function formatHours(minutes: number, format: "decimal" | "hm"): string {
+  if (format === "hm") {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    if (h === 0) return `${m}m`;
+    if (m === 0) return `${h}h`;
+    return `${h}h ${m}m`;
+  }
+  return (minutes / 60).toFixed(2);
+}
+
+const titleSizePt = { small: 16, medium: 20, large: 24 } as const;
+const bodySizePt = { small: 8, medium: 9, large: 10 } as const;
 
 interface InvoicePdfProps {
-  invoice: {
-    invoiceNumber: string;
-    status: string;
-    totalAmount: string;
-    issuedAt: string;
-    paidAt: string | null;
-  };
-  client: {
-    name: string;
-    email: string | null;
-    addressLine1: string;
-    addressLine2: string | null;
-    county: string;
-    postcode: string;
-  };
-  entries: Array<{
-    date: string;
-    title: string;
-    minutes: number;
-    ratePerHour: string;
-  }>;
+  invoice: Invoice;
+  client: Client;
+  entries: TimeEntry[];
+  user: User;
 }
 
-export function InvoicePdf({ invoice, client, entries }: InvoicePdfProps) {
+export function InvoicePdf({
+  invoice,
+  client,
+  entries,
+  user,
+}: InvoicePdfProps) {
+  const c: InvoiceTemplateConfig = parseTemplate(user.invoiceTemplate);
+
+  const title = c.titleText || "INVOICE";
+  const totalMinutes = entries.reduce((sum, e) => sum + e.minutes, 0);
+  const totalAmount = Number.parseFloat(invoice.totalAmount);
+  const bodySize = bodySizePt[c.bodySize];
+
+  const clientAddress = [
+    client.addressLine1,
+    client.addressLine2,
+    client.county,
+    client.postcode,
+  ].filter(Boolean);
+
+  const clientOnLeft = c.clientDetailsPosition === "left";
+
+  // Column widths
+  const hoursWidth = c.showHoursColumn ? 55 : 0;
+  const rateWidth = c.showRateColumn ? 65 : 0;
+  const totalWidth = 65;
+
+  const resolvedFooter = c.footer
+    ? resolveFooterPlaceholders(c.footer, {
+        name: user.name,
+        email: user.email,
+        addressLine1: user.addressLine1,
+        addressLine2: user.addressLine2,
+        county: user.county,
+        postcode: user.postcode,
+        mobile: user.mobile,
+        bankName: user.bankName,
+        accountNumber: user.accountNumber,
+        sortCode: user.sortCode,
+        reference: invoice.invoiceNumber,
+      })
+    : "";
+
+  const styles = StyleSheet.create({
+    page: {
+      padding: 40,
+      fontSize: bodySize,
+      fontFamily: "Helvetica",
+      color: c.textColor,
+    },
+    headerRow: {
+      flexDirection: "row",
+      marginBottom: 28,
+    },
+    title: {
+      fontSize: titleSizePt[c.titleSize],
+      fontFamily: "Helvetica-Bold",
+      color: c.titleColor,
+      marginBottom: 4,
+      textAlign: c.titleAlignment,
+    },
+    invoiceForLabel: {
+      fontSize: bodySize,
+      fontFamily: "Helvetica-Bold",
+      color: "#999",
+      textTransform: "uppercase" as const,
+      marginBottom: 3,
+    },
+    invoiceForName: {
+      fontSize: bodySize + 2,
+      fontFamily: "Helvetica-Bold",
+    },
+    meta: {
+      fontSize: bodySize,
+      marginBottom: 2,
+    },
+    clientName: {
+      fontSize: bodySize + 1,
+      fontFamily: "Helvetica-Bold",
+      marginBottom: 2,
+    },
+    clientDetail: {
+      fontSize: bodySize,
+      marginBottom: 1,
+    },
+    tableHeaderRow: {
+      flexDirection: "row",
+      borderBottomWidth: 2,
+      borderBottomColor: c.tableBorderColor,
+      backgroundColor: c.tableHeaderBgColor,
+      paddingBottom: 4,
+      paddingHorizontal: 2,
+      marginBottom: 2,
+    },
+    tableHeaderText: {
+      fontFamily: "Helvetica-Bold",
+      color: c.tableHeaderTextColor,
+    },
+    tableRow: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderBottomColor: "#eee",
+      paddingVertical: 4,
+      paddingHorizontal: 2,
+    },
+    colDesc: {
+      flex: 1,
+    },
+    colHours: {
+      width: hoursWidth,
+      textAlign: "right",
+    },
+    colRate: {
+      width: rateWidth,
+      textAlign: "right",
+    },
+    colTotal: {
+      width: totalWidth,
+      textAlign: "right",
+    },
+    totalRow: {
+      flexDirection: "row",
+      borderTopWidth: 2,
+      borderTopColor: c.tableBorderColor,
+      paddingTop: 6,
+      paddingHorizontal: 2,
+      marginTop: 4,
+    },
+    totalLabel: {
+      flex: 1,
+      fontFamily: "Helvetica-Bold",
+      fontSize: bodySize + 2,
+    },
+    totalHours: {
+      width: hoursWidth,
+      textAlign: "right",
+      fontFamily: "Helvetica-Bold",
+      fontSize: bodySize + 2,
+    },
+    totalRate: {
+      width: rateWidth,
+    },
+    totalValue: {
+      width: totalWidth,
+      textAlign: "right",
+      fontFamily: "Helvetica-Bold",
+      fontSize: bodySize + 2,
+    },
+    footer: {
+      position: "absolute" as const,
+      bottom: 30,
+      left: 40,
+      right: 40,
+      textAlign: "center",
+      fontSize: bodySize - 2,
+      color: c.footerTextColor,
+      borderTopWidth: 1,
+      borderTopColor: "#eee",
+      paddingTop: 6,
+    },
+  });
+
+  const invoiceMetaView = (
+    <View
+      style={{
+        flex: 1,
+        alignItems: clientOnLeft ? "flex-end" : "flex-start",
+      }}
+    >
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.meta}>Date: {formatDate(invoice.issuedAt)}</Text>
+      <Text style={styles.meta}>Invoice #: {invoice.invoiceNumber}</Text>
+    </View>
+  );
+
+  const clientView = (
+    <View
+      style={{
+        flex: 1,
+        alignItems: clientOnLeft ? "flex-start" : "flex-end",
+      }}
+    >
+      <Text style={styles.clientName}>{client.name}</Text>
+      {clientAddress.map((line) => (
+        <Text key={line} style={styles.clientDetail}>
+          {line}
+        </Text>
+      ))}
+      {client.vatNumber && (
+        <Text style={styles.clientDetail}>VAT: {client.vatNumber}</Text>
+      )}
+    </View>
+  );
+
+  const invoiceForView = c.showInvoiceFor ? (
+    <View style={{ flex: 1, alignItems: "center" }}>
+      <Text style={styles.invoiceForLabel}>Invoice For</Text>
+      <Text style={styles.invoiceForName}>{client.name}</Text>
+    </View>
+  ) : null;
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.title}>INVOICE</Text>
-          <Text style={styles.subtitle}>{invoice.invoiceNumber}</Text>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          {clientOnLeft ? (
+            <>
+              {clientView}
+              {invoiceForView}
+              {invoiceMetaView}
+            </>
+          ) : (
+            <>
+              {invoiceMetaView}
+              {invoiceForView}
+              {clientView}
+            </>
+          )}
         </View>
 
-        <View style={styles.meta}>
-          <View style={styles.metaBlock}>
-            <Text style={styles.sectionTitle}>Bill To</Text>
-            <Text style={styles.clientName}>{client.name}</Text>
-            {client.email && <Text>{client.email}</Text>}
-            {client.addressLine1 && <Text>{client.addressLine1}</Text>}
-            {client.addressLine2 && <Text>{client.addressLine2}</Text>}
-            {(client.county || client.postcode) && (
-              <Text>
-                {[client.county, client.postcode].filter(Boolean).join(", ")}
-              </Text>
-            )}
-          </View>
-          <View style={styles.metaBlock}>
-            <Text style={styles.sectionTitle}>Invoice Details</Text>
-            <Text>Date: {invoice.issuedAt}</Text>
-            <Text style={styles.status}>Status: {invoice.status}</Text>
-            {invoice.paidAt && <Text>Paid: {invoice.paidAt}</Text>}
-          </View>
+        {/* Table header */}
+        <View style={styles.tableHeaderRow}>
+          <Text style={[styles.colDesc, styles.tableHeaderText]}>
+            Description
+          </Text>
+          {c.showHoursColumn && (
+            <Text style={[styles.colHours, styles.tableHeaderText]}>Hours</Text>
+          )}
+          {c.showRateColumn && (
+            <Text style={[styles.colRate, styles.tableHeaderText]}>
+              Rate (£)
+            </Text>
+          )}
+          <Text style={[styles.colTotal, styles.tableHeaderText]}>
+            Total (£)
+          </Text>
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.headerRow}>
-            <Text style={[styles.colDate, styles.bold]}>Date</Text>
-            <Text style={[styles.colDesc, styles.bold]}>Description</Text>
-            <Text style={[styles.colSmall, styles.bold]}>Time</Text>
-            <Text style={[styles.colSmall, styles.bold]}>Rate</Text>
-            <Text style={[styles.colSmall, styles.bold]}>Amount</Text>
-          </View>
-
-          {entries.map((entry) => {
-            const amount =
-              (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
-            return (
-              <View key={`${entry.date}-${entry.title}`} style={styles.row}>
-                <Text style={styles.colDate}>{entry.date}</Text>
-                <Text style={styles.colDesc}>{entry.title}</Text>
-                <Text style={styles.colSmall}>
-                  {formatMinutes(entry.minutes)}
+        {/* Rows */}
+        {entries.map((entry) => {
+          const amount =
+            (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
+          return (
+            <View key={entry.id} style={styles.tableRow}>
+              <Text style={styles.colDesc}>{entry.title}</Text>
+              {c.showHoursColumn && (
+                <Text style={styles.colHours}>
+                  {formatHours(entry.minutes, c.hoursFormat)}
                 </Text>
-                <Text style={styles.colSmall}>
+              )}
+              {c.showRateColumn && (
+                <Text style={styles.colRate}>
                   {formatGBP(entry.ratePerHour)}
                 </Text>
-                <Text style={styles.colSmall}>{formatGBP(amount)}</Text>
-              </View>
-            );
-          })}
+              )}
+              <Text style={styles.colTotal}>{formatGBP(amount)}</Text>
+            </View>
+          );
+        })}
 
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>
-              {formatGBP(invoice.totalAmount)}
+        {/* Grand Total */}
+        <View style={styles.totalRow}>
+          <Text style={styles.totalLabel}>Grand Total</Text>
+          {c.showHoursColumn && (
+            <Text style={styles.totalHours}>
+              {formatHours(totalMinutes, c.hoursFormat)}
             </Text>
-          </View>
+          )}
+          {c.showRateColumn && <Text style={styles.totalRate} />}
+          <Text style={styles.totalValue}>{formatGBP(totalAmount)}</Text>
         </View>
+
+        {/* Footer */}
+        {resolvedFooter && (
+          <View style={styles.footer}>
+            <Text>{resolvedFooter}</Text>
+          </View>
+        )}
       </Page>
     </Document>
   );

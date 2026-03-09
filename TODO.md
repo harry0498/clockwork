@@ -5,7 +5,9 @@ The items are manually added by me and should be ticked off as they are complete
 
 ## Items
 
-- [ ] I want an invoice template editor, I should be able to preview the template then save it so future invoices use the template. I dont need to save multiple templates, just 1 is ok.
+- [ ] InvoicePreview style does not match the invoice-pdf styles StyleSheet. Ensure theres 1 source of truth for this. Maybe instead of rendering the InvoicePreview as HTML, it should render the PDF that was genereated.
+- [ ] Invoice Template footer should allow me to make certain text bold.
+- [ ] The last entry item has a bottom border, it shouldnt.
 
 - [ ] Theres no client page, clicking a view client link just takes it to the new client page.
 - [ ] The edit client action also opens the new client page with prefilled data. This should be an edit page not new.
