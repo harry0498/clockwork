@@ -54,7 +54,7 @@ export function ClientForm({ client }: ClientFormProps) {
       } else {
         await createClient(data);
       }
-      router.push("/clients");
+      router.push(isEditing ? `/clients/${client.id}` : "/clients");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

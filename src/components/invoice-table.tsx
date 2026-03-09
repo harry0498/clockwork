@@ -45,10 +45,7 @@ export function InvoiceTable({ invoices }: { invoices: InvoiceWithClient[] }) {
     {
       header: "Client",
       accessor: (inv) => (
-        <Link
-          href={`/clients/new?id=${inv.client.id}`}
-          className="hover:underline"
-        >
+        <Link href={`/clients/${inv.client.id}`} className="hover:underline">
           {inv.client.name}
         </Link>
       ),

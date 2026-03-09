@@ -36,10 +36,7 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
     {
       header: "Client",
       accessor: (e) => (
-        <Link
-          href={`/clients/new?id=${e.client.id}`}
-          className="hover:underline"
-        >
+        <Link href={`/clients/${e.client.id}`} className="hover:underline">
           {e.client.name}
         </Link>
       ),

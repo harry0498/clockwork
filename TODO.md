@@ -4,8 +4,7 @@ This is a todo list of feature additions, bug fixes, and other updates to the ap
 
 ## Items
 
-- Theres no client page, clicking a view client link just takes it to the new client page.
-- The edit client action also opens the new client page with prefilled data. This should be an edit page not new.
+- Add the preview invoice to the view invoice page so I can see it without having to download it.
 
 - Replace the client/entry/invoice create/edit/delete pages with dialogs.
 - We are missing confirmation dialogs too.
@@ -16,3 +15,5 @@ This is a todo list of feature additions, bug fixes, and other updates to the ap
 - On the time entry table, I cant do bulk actions like select multiple items and mark all as invoiced. Please make sure I can do bulk actions for Mark as invociced, unmark as invoiced, delete.
 
 - Use toast notifications.
+
+- When I click on the client name in the client table it should view the client.

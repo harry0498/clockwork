@@ -50,7 +50,7 @@ export function ClientTable({ clients }: { clients: ClientWithStats[] }) {
       actions={(c) => (
         <ActionMenu
           items={[
-            { label: "Edit", href: `/clients/new?id=${c.id}` },
+            { label: "Edit", href: `/clients/${c.id}/edit` },
             {
               label: "Delete",
               onClick: () => deleteClient(c.id),
