@@ -47,6 +47,7 @@ export async function getInvoiceTemplate() {
       bankName: user.bankName,
       accountNumber: user.accountNumber,
       sortCode: user.sortCode,
+      reference: null,
     },
   };
 }

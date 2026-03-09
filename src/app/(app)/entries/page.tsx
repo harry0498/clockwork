@@ -26,12 +26,14 @@ export default async function EntriesPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Time Entries</h1>
-        <Link
-          href="/entries/new"
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-        >
-          New Entry
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/entries/new"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            New Entry
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

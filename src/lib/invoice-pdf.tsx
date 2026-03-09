@@ -1,10 +1,69 @@
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import type { InvoiceTemplateConfig } from "@/lib/invoice-template";
+import type {
+  FooterProfileData,
+  InvoiceTemplateConfig,
+} from "@/lib/invoice-template";
 import {
+  parseFooterBold,
   parseTemplate,
   resolveFooterPlaceholders,
 } from "@/lib/invoice-template";
 import type { Client, Invoice, TimeEntry, User } from "@/lib/types";
+
+const sampleEntries: TimeEntry[] = [
+  {
+    id: "preview-1",
+    userId: "preview",
+    clientId: "preview",
+    title: "Website redesign - homepage",
+    notes: null,
+    minutes: 130,
+    ratePerHour: "45.00",
+    date: "2026-03-01",
+    invoiceId: null,
+    manuallyInvoiced: false,
+    createdAt: new Date(),
+  },
+  {
+    id: "preview-2",
+    userId: "preview",
+    clientId: "preview",
+    title: "Website redesign - about page",
+    notes: null,
+    minutes: 170,
+    ratePerHour: "45.00",
+    date: "2026-03-02",
+    invoiceId: null,
+    manuallyInvoiced: false,
+    createdAt: new Date(),
+  },
+  {
+    id: "preview-3",
+    userId: "preview",
+    clientId: "preview",
+    title: "API integration work",
+    notes: null,
+    minutes: 245,
+    ratePerHour: "45.00",
+    date: "2026-03-03",
+    invoiceId: null,
+    manuallyInvoiced: false,
+    createdAt: new Date(),
+  },
+  {
+    id: "preview-4",
+    userId: "preview",
+    clientId: "preview",
+    title: "Bug fixes and QA testing",
+    notes: null,
+    minutes: 95,
+    ratePerHour: "45.00",
+    date: "2026-03-04",
+    invoiceId: null,
+    manuallyInvoiced: false,
+    createdAt: new Date(),
+  },
+];
 
 function formatGBP(amount: number | string): string {
   const num = typeof amount === "string" ? Number.parseFloat(amount) : amount;
@@ -33,6 +92,7 @@ function formatHours(minutes: number, format: "decimal" | "hm"): string {
 
 const titleSizePt = { small: 16, medium: 20, large: 24 } as const;
 const bodySizePt = { small: 8, medium: 9, large: 10 } as const;
+const footerSizePt = { small: 7, medium: 8, large: 9 } as const;
 
 interface InvoicePdfProps {
   invoice: Invoice;
@@ -53,6 +113,7 @@ export function InvoicePdf({
   const totalMinutes = entries.reduce((sum, e) => sum + e.minutes, 0);
   const totalAmount = Number.parseFloat(invoice.totalAmount);
   const bodySize = bodySizePt[c.bodySize];
+  const footerSize = footerSizePt[c.footerSize];
 
   const clientAddress = [
     client.addressLine1,
@@ -195,7 +256,7 @@ export function InvoicePdf({
       left: 40,
       right: 40,
       textAlign: "center",
-      fontSize: bodySize - 2,
+      fontSize: footerSize,
       color: c.footerTextColor,
       borderTopWidth: 1,
       borderTopColor: "#eee",
@@ -283,10 +344,16 @@ export function InvoicePdf({
         {/* Rows */}
         {entries.map((entry, index) => {
           const amount =
-          (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
+            (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
           const isLast = index === entries.length - 1;
           return (
-            <View key={entry.id} style={{...styles.tableRow, ...(isLast ? { borderBottomWidth: 0 } : {})}}>
+            <View
+              key={entry.id}
+              style={{
+                ...styles.tableRow,
+                ...(isLast ? { borderBottomWidth: 0 } : {}),
+              }}
+            >
               <Text style={styles.colDesc}>{entry.title}</Text>
               {c.showHoursColumn && (
                 <Text style={styles.colHours}>
@@ -318,10 +385,88 @@ export function InvoicePdf({
         {/* Footer */}
         {resolvedFooter && (
           <View style={styles.footer}>
-            <Text>{resolvedFooter}</Text>
+            {resolvedFooter.split("\n").map((line) => (
+              <Text key={line}>
+                {parseFooterBold(line).map((seg) =>
+                  seg.bold ? (
+                    <Text
+                      key={`b-${seg.text}`}
+                      style={{ fontFamily: "Helvetica-Bold" }}
+                    >
+                      {seg.text}
+                    </Text>
+                  ) : (
+                    <Text key={`n-${seg.text}`}>{seg.text}</Text>
+                  ),
+                )}
+              </Text>
+            ))}
           </View>
         )}
       </Page>
     </Document>
+  );
+}
+
+interface PreviewDocProps {
+  config: InvoiceTemplateConfig;
+  profile: FooterProfileData;
+}
+
+export function InvoicePdfPreviewDoc({ config, profile }: PreviewDocProps) {
+  const totalAmount = sampleEntries.reduce(
+    (sum, e) => sum + (e.minutes / 60) * Number.parseFloat(e.ratePerHour),
+    0,
+  );
+
+  const invoice: Invoice = {
+    id: "preview",
+    userId: "preview",
+    clientId: "preview",
+    invoiceNumber: "260309A",
+    status: "draft",
+    totalAmount: totalAmount.toFixed(2),
+    issuedAt: "2026-03-09",
+    paidAt: null,
+    createdAt: new Date(),
+  };
+
+  const client: Client = {
+    id: "preview",
+    userId: "preview",
+    name: "Acme Corp Ltd",
+    email: "accounts@acme.example.com",
+    addressLine1: "123 Business Street",
+    addressLine2: "London",
+    county: "",
+    postcode: "SW1A 1AA",
+    vatNumber: "GB123456789",
+    createdAt: new Date(),
+  };
+
+  const user: User = {
+    id: "preview",
+    email: profile.email,
+    name: profile.name,
+    passwordHash: "",
+    addressLine1: profile.addressLine1,
+    addressLine2: profile.addressLine2,
+    county: profile.county,
+    postcode: profile.postcode,
+    mobile: profile.mobile,
+    bankName: profile.bankName,
+    accountNumber: profile.accountNumber,
+    sortCode: profile.sortCode,
+    invoiceTemplate: JSON.stringify(config),
+    createdAt: new Date(),
+  };
+
+  return (
+    <InvoicePdf
+      invoice={invoice}
+      client={client}
+      entries={sampleEntries}
+      user={user}
+    />
   );
 }

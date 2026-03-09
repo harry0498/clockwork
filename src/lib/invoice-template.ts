@@ -19,6 +19,7 @@ export const invoiceTemplateSchema = z.object({
   // Typography
   titleSize: z.enum(["small", "medium", "large"]),
   bodySize: z.enum(["small", "medium", "large"]),
+  footerSize: z.enum(["small", "medium", "large"]),
 
   // Layout
   titleAlignment: z.enum(["left", "center", "right"]),
@@ -90,7 +91,7 @@ export function resolveFooterPlaceholders(
 
 const DEFAULT_FOOTER_NOTES = `No VAT to pay. Payment due within 14 days of invoice. E&OE.
 Payment by bank transfer.
-Bank transfers to account: %accountNumber%, sort-code: %sortCode%, reference: %reference%
+Bank transfers to account: **%accountNumber%**, sort-code: **%sortCode%**, reference: **%reference%**
 
 %name% | %address%
 tel: %mobile% | e-mail: %email%`;
@@ -109,6 +110,7 @@ export const defaultTemplate: InvoiceTemplateConfig = {
 
   titleSize: "large",
   bodySize: "medium",
+  footerSize: "small",
 
   titleAlignment: "left",
   showInvoiceFor: true,
@@ -120,6 +122,32 @@ export const defaultTemplate: InvoiceTemplateConfig = {
 
   footer: DEFAULT_FOOTER_NOTES,
 };
+
+export interface FooterSegment {
+  text: string;
+  bold: boolean;
+}
+
+export function parseFooterBold(text: string): FooterSegment[] {
+  const segments: FooterSegment[] = [];
+  const regex = /\*\*(.+?)\*\*/g;
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(regex)) {
+    const idx = match.index;
+    if (idx > lastIndex) {
+      segments.push({ text: text.slice(lastIndex, idx), bold: false });
+    }
+    segments.push({ text: match[1], bold: true });
+    lastIndex = idx + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    segments.push({ text: text.slice(lastIndex), bold: false });
+  }
+
+  return segments.length > 0 ? segments : [{ text, bold: false }];
+}
 
 export function parseTemplate(json: string | null): InvoiceTemplateConfig {
   if (!json) return defaultTemplate;

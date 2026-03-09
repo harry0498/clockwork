@@ -1,11 +1,24 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { memo, useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { updateInvoiceTemplate } from "@/actions/invoice-template";
 import { Alert } from "@/components/alert";
-import { InvoicePreview } from "@/components/invoice-preview";
+
+const InvoicePdfPreview = dynamic(
+  () => import("@/components/invoice-pdf-preview"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex aspect-[1/1.414] w-full items-center justify-center rounded-md border bg-white lg:aspect-auto lg:h-full">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+      </div>
+    ),
+  },
+);
+
 import { inputClassName } from "@/lib/constants";
 import {
   FOOTER_PLACEHOLDERS,
@@ -19,16 +32,18 @@ interface InvoiceTemplateEditorProps {
   profile: FooterProfileData;
 }
 
-function ColorField({
+const ColorField = memo(function ColorField({
   label,
   id,
+  field,
   value,
-  onChange,
+  onColorChange,
 }: {
   label: string;
   id: string;
+  field: keyof InvoiceTemplateConfig;
   value: string;
-  onChange: (v: string) => void;
+  onColorChange: (field: keyof InvoiceTemplateConfig, value: string) => void;
 }) {
   return (
     <div className="space-y-1">
@@ -39,7 +54,7 @@ function ColorField({
         <input
           type="color"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onColorChange(field, e.target.value)}
           className="h-8 w-8 cursor-pointer rounded border border-input"
         />
         <input
@@ -47,15 +62,15 @@ function ColorField({
           type="text"
           maxLength={7}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onColorChange(field, e.target.value)}
           className={`${inputClassName} font-mono text-xs`}
         />
       </div>
     </div>
   );
-}
+});
 
-function Section({
+const Section = memo(function Section({
   title,
   children,
 }: {
@@ -68,7 +83,7 @@ function Section({
       {children}
     </fieldset>
   );
-}
+});
 
 export function InvoiceTemplateEditor({
   config,
@@ -83,6 +98,7 @@ export function InvoiceTemplateEditor({
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { isSubmitting },
   } = useForm<InvoiceTemplateConfig>({
     resolver: zodResolver(invoiceTemplateSchema),
@@ -91,26 +107,32 @@ export function InvoiceTemplateEditor({
 
   const w = watch();
 
-  function setColor(field: keyof InvoiceTemplateConfig, value: string) {
-    setValue(field, value, { shouldValidate: true });
-  }
+  const setColor = useCallback(
+    (field: keyof InvoiceTemplateConfig, value: string) => {
+      setValue(field, value, { shouldValidate: true });
+    },
+    [setValue],
+  );
 
-  function insertPlaceholder(token: string) {
-    const el = footerRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const current = w.footer ?? "";
-    const next = current.slice(0, start) + token + current.slice(end);
-    setValue("footer", next, { shouldValidate: true });
-    const cursorPos = start + token.length;
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(cursorPos, cursorPos);
-    });
-  }
+  const insertPlaceholder = useCallback(
+    (token: string) => {
+      const el = footerRef.current;
+      if (!el) return;
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const current = getValues("footer") ?? "";
+      const next = current.slice(0, start) + token + current.slice(end);
+      setValue("footer", next, { shouldValidate: true });
+      const cursorPos = start + token.length;
+      requestAnimationFrame(() => {
+        el.focus();
+        el.setSelectionRange(cursorPos, cursorPos);
+      });
+    },
+    [setValue, getValues],
+  );
 
-  async function onSubmit(data: InvoiceTemplateConfig) {
+  const onSubmit = useCallback(async (data: InvoiceTemplateConfig) => {
     setError("");
     setSuccess("");
     try {
@@ -119,14 +141,17 @@ export function InvoiceTemplateEditor({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     }
-  }
+  }, []);
 
   const { ref: formRef, ...footerRegister } = register("footer");
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr]">
+    <div className="flex flex-col gap-6 lg:min-h-0 lg:flex-1 lg:flex-row">
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-4 lg:flex-1 lg:overflow-y-auto lg:pb-6"
+      >
         {error && <Alert message={error} variant="error" />}
         {success && <Alert message={success} variant="success" />}
 
@@ -166,44 +191,51 @@ export function InvoiceTemplateEditor({
             <ColorField
               label="Title"
               id="titleColor"
+              field="titleColor"
               value={w.titleColor}
-              onChange={(v) => setColor("titleColor", v)}
+              onColorChange={setColor}
             />
             <ColorField
               label="Accent / Borders"
               id="accentColor"
+              field="accentColor"
               value={w.accentColor}
-              onChange={(v) => setColor("accentColor", v)}
+              onColorChange={setColor}
             />
             <ColorField
               label="Body Text"
               id="textColor"
+              field="textColor"
               value={w.textColor}
-              onChange={(v) => setColor("textColor", v)}
+              onColorChange={setColor}
             />
             <ColorField
               label="Footer Text"
               id="footerTextColor"
+              field="footerTextColor"
               value={w.footerTextColor}
-              onChange={(v) => setColor("footerTextColor", v)}
+              onColorChange={setColor}
             />
             <ColorField
               label="Table Header BG"
               id="tableHeaderBgColor"
+              field="tableHeaderBgColor"
               value={w.tableHeaderBgColor}
-              onChange={(v) => setColor("tableHeaderBgColor", v)}
+              onColorChange={setColor}
             />
             <ColorField
               label="Table Header Text"
               id="tableHeaderTextColor"
+              field="tableHeaderTextColor"
               value={w.tableHeaderTextColor}
-              onChange={(v) => setColor("tableHeaderTextColor", v)}
+              onColorChange={setColor}
             />
             <ColorField
               label="Table Borders"
               id="tableBorderColor"
+              field="tableBorderColor"
               value={w.tableBorderColor}
-              onChange={(v) => setColor("tableBorderColor", v)}
+              onColorChange={setColor}
             />
           </div>
         </Section>
@@ -232,6 +264,20 @@ export function InvoiceTemplateEditor({
               <select
                 id="bodySize"
                 {...register("bodySize")}
+                className={inputClassName}
+              >
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="footerSize" className="text-xs font-medium">
+                Footer Size
+              </label>
+              <select
+                id="footerSize"
+                {...register("footerSize")}
                 className={inputClassName}
               >
                 <option value="small">Small</option>
@@ -351,6 +397,9 @@ export function InvoiceTemplateEditor({
             <p className="text-xs text-muted-foreground">
               {w.footer?.length ?? 0}/1000
             </p>
+            <p className="text-xs text-muted-foreground">
+              Wrap text in **double asterisks** to make it bold
+            </p>
           </div>
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground">
@@ -381,9 +430,8 @@ export function InvoiceTemplateEditor({
       </form>
 
       {/* Preview */}
-      <div className="space-y-2 lg:sticky lg:top-6 lg:self-start">
-        <h2 className="text-sm font-medium text-muted-foreground">Preview</h2>
-        <InvoicePreview config={w} profile={profile} />
+      <div className="lg:flex-1">
+        <InvoicePdfPreview config={w} profile={profile} />
       </div>
     </div>
   );
