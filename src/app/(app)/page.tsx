@@ -47,13 +47,17 @@ export default async function DashboardPage() {
           label="Hours"
           total={formatMinutes(stats.totalMinutes)}
           invoiced={formatMinutes(stats.billedMinutes)}
-          unbilled={formatMinutes(stats.unbilledMinutes)}
+          uninvoiced={formatMinutes(stats.unbilledMinutes)}
+          paid={formatMinutes(stats.paidMinutes)}
+          unpaid={formatMinutes(stats.unpaidMinutes)}
         />
         <StatGroup
           label="Earnings"
           total={formatGBP(stats.totalEarned)}
           invoiced={formatGBP(stats.billedAmount)}
-          unbilled={formatGBP(stats.unbilledAmount)}
+          uninvoiced={formatGBP(stats.unbilledAmount)}
+          paid={formatGBP(stats.paidAmount)}
+          unpaid={formatGBP(stats.unpaidAmount)}
         />
       </div>
 
@@ -133,12 +137,16 @@ function StatGroup({
   label,
   total,
   invoiced,
-  unbilled,
+  uninvoiced,
+  paid,
+  unpaid,
 }: {
   label: string;
   total: string;
   invoiced: string;
-  unbilled: string;
+  uninvoiced: string;
+  paid: string;
+  unpaid: string;
 }) {
   return (
     <div className="rounded-lg border border-border p-4">
@@ -146,7 +154,9 @@ function StatGroup({
       <p className="text-2xl font-bold">{total}</p>
       <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 text-sm">
         <p className="text-green-600">Invoiced: {invoiced}</p>
-        <p className="text-amber-600">Unbilled: {unbilled}</p>
+        <p className="text-amber-600">Uninvoiced: {uninvoiced}</p>
+        <p className="text-emerald-600">Paid: {paid}</p>
+        <p className="text-red-600">Unpaid: {unpaid}</p>
       </div>
     </div>
   );

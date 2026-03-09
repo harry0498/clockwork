@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { deleteEntry, toggleManuallyInvoiced } from "@/actions/entries";
 import { ActionMenu } from "@/components/action-menu";
 import { type Column, DataTable } from "@/components/data-table";
@@ -32,7 +33,17 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
 
   const columns: Column<Entry>[] = [
     { header: "Date", accessor: "date" },
-    { header: "Client", accessor: (e) => e.client.name },
+    {
+      header: "Client",
+      accessor: (e) => (
+        <Link
+          href={`/clients/new?id=${e.client.id}`}
+          className="hover:underline"
+        >
+          {e.client.name}
+        </Link>
+      ),
+    },
     { header: "Title", accessor: "title", className: "font-medium" },
     {
       header: "Time",
@@ -76,7 +87,16 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
       data={entries}
       keyExtractor={(e) => e.id}
       actions={(entry) =>
-        entry.invoiceId ? null : (
+        entry.invoiceId ? (
+          <ActionMenu
+            items={[
+              {
+                label: "View Invoice",
+                href: `/invoices/${entry.invoiceId}`,
+              },
+            ]}
+          />
+        ) : (
           <ActionMenu
             items={[
               {

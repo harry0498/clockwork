@@ -42,7 +42,17 @@ export function InvoiceTable({ invoices }: { invoices: InvoiceWithClient[] }) {
         </Link>
       ),
     },
-    { header: "Client", accessor: (inv) => inv.client.name },
+    {
+      header: "Client",
+      accessor: (inv) => (
+        <Link
+          href={`/clients/new?id=${inv.client.id}`}
+          className="hover:underline"
+        >
+          {inv.client.name}
+        </Link>
+      ),
+    },
     { header: "Date", accessor: "issuedAt", hideOnMobile: true },
     {
       header: "Total",

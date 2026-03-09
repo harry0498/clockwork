@@ -57,17 +57,34 @@ export async function getDashboardStats() {
       ),
     );
 
+  const [paidStats] = await db
+    .select({
+      paidMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
+      paidAmount: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
+    })
+    .from(timeEntries)
+    .innerJoin(invoices, eq(timeEntries.invoiceId, invoices.id))
+    .where(and(baseWhere, eq(invoices.status, "paid")));
+
   const totalMinutes = Number(allStats.totalMinutes);
   const totalEarned = Number(allStats.totalEarned);
   const unbilledMinutes = Number(unbilledStats.unbilledMinutes);
   const unbilledAmount = Number(unbilledStats.unbilledAmount);
+  const billedMinutes = totalMinutes - unbilledMinutes;
+  const billedAmount = totalEarned - unbilledAmount;
+  const paidMinutes = Number(paidStats.paidMinutes);
+  const paidAmount = Number(paidStats.paidAmount);
 
   return {
     totalMinutes,
     totalEarned,
     unbilledMinutes,
     unbilledAmount,
-    billedMinutes: totalMinutes - unbilledMinutes,
-    billedAmount: totalEarned - unbilledAmount,
+    billedMinutes,
+    billedAmount,
+    paidMinutes,
+    paidAmount,
+    unpaidMinutes: billedMinutes - paidMinutes,
+    unpaidAmount: billedAmount - paidAmount,
   };
 }
