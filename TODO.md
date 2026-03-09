@@ -4,8 +4,6 @@ This is a todo list of feature additions, bug fixes, and other updates to the ap
 
 ## Items
 
-- Add the preview invoice to the view invoice page so I can see it without having to download it.
-
 - Replace the client/entry/invoice create/edit/delete pages with dialogs.
 - We are missing confirmation dialogs too.
 
