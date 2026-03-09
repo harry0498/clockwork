@@ -281,11 +281,12 @@ export function InvoicePdf({
         </View>
 
         {/* Rows */}
-        {entries.map((entry) => {
+        {entries.map((entry, index) => {
           const amount =
-            (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
+          (entry.minutes / 60) * Number.parseFloat(entry.ratePerHour);
+          const isLast = index === entries.length - 1;
           return (
-            <View key={entry.id} style={styles.tableRow}>
+            <View key={entry.id} style={{...styles.tableRow, ...(isLast ? { borderBottomWidth: 0 } : {})}}>
               <Text style={styles.colDesc}>{entry.title}</Text>
               {c.showHoursColumn && (
                 <Text style={styles.colHours}>
