@@ -6,6 +6,7 @@ import { getEntries } from "@/actions/entries";
 import { DataTable } from "@/components/data-table";
 import { EmptyState } from "@/components/empty-state";
 import { QuickLog } from "@/components/quick-log";
+import { StatGroup } from "@/components/stat-group";
 import {
   calculateAmount,
   formatGBP,
@@ -45,20 +46,20 @@ export default async function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <StatGroup
-          label="Hours"
-          total={formatMinutes(stats.totalMinutes)}
-          invoiced={formatMinutes(stats.billedMinutes)}
-          uninvoiced={formatMinutes(stats.unbilledMinutes)}
-          paid={formatMinutes(stats.paidMinutes)}
-          unpaid={formatMinutes(stats.unpaidMinutes)}
+          variant="hours"
+          total={stats.totalMinutes}
+          invoiced={stats.billedMinutes}
+          uninvoiced={stats.unbilledMinutes}
+          paid={stats.paidMinutes}
+          unpaid={stats.unpaidMinutes}
         />
         <StatGroup
-          label="Earnings"
-          total={formatGBP(stats.totalEarned)}
-          invoiced={formatGBP(stats.billedAmount)}
-          uninvoiced={formatGBP(stats.unbilledAmount)}
-          paid={formatGBP(stats.paidAmount)}
-          unpaid={formatGBP(stats.unpaidAmount)}
+          variant="earnings"
+          total={stats.totalEarned}
+          invoiced={stats.billedAmount}
+          uninvoiced={stats.unbilledAmount}
+          paid={stats.paidAmount}
+          unpaid={stats.unpaidAmount}
         />
       </div>
 
@@ -129,35 +130,6 @@ export default async function DashboardPage() {
             keyExtractor={(e) => e.id}
           />
         )}
-      </div>
-    </div>
-  );
-}
-
-function StatGroup({
-  label,
-  total,
-  invoiced,
-  uninvoiced,
-  paid,
-  unpaid,
-}: {
-  label: string;
-  total: string;
-  invoiced: string;
-  uninvoiced: string;
-  paid: string;
-  unpaid: string;
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-2xl font-bold">{total}</p>
-      <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 text-sm">
-        <p className="text-green-600">Invoiced: {invoiced}</p>
-        <p className="text-amber-600">Uninvoiced: {uninvoiced}</p>
-        <p className="text-emerald-600">Paid: {paid}</p>
-        <p className="text-red-600">Unpaid: {unpaid}</p>
       </div>
     </div>
   );

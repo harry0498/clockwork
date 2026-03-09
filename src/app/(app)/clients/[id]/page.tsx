@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getClientWithStats } from "@/actions/clients";
 import { ClientDetailActions } from "@/components/client-detail-actions";
-import { formatGBP, formatMinutes } from "@/lib/tax-year";
+import { StatGroup } from "@/components/stat-group";
 
 export default async function ClientDetailPage({
   params,
@@ -39,44 +39,22 @@ export default async function ClientDetailPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-sm text-muted-foreground">Hours</p>
-          <p className="text-2xl font-bold">
-            {formatMinutes(client.totalMinutes)}
-          </p>
-          <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 text-sm">
-            <p className="text-green-600">
-              Invoiced: {formatMinutes(client.billedMinutes)}
-            </p>
-            <p className="text-amber-600">
-              Uninvoiced: {formatMinutes(client.unbilledMinutes)}
-            </p>
-            <p className="text-emerald-600">
-              Paid: {formatMinutes(client.paidMinutes)}
-            </p>
-            <p className="text-red-600">
-              Unpaid: {formatMinutes(client.unpaidMinutes)}
-            </p>
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-sm text-muted-foreground">Earnings</p>
-          <p className="text-2xl font-bold">{formatGBP(client.totalEarned)}</p>
-          <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 text-sm">
-            <p className="text-green-600">
-              Invoiced: {formatGBP(client.billedAmount)}
-            </p>
-            <p className="text-amber-600">
-              Uninvoiced: {formatGBP(client.unbilledAmount)}
-            </p>
-            <p className="text-emerald-600">
-              Paid: {formatGBP(client.paidAmount)}
-            </p>
-            <p className="text-red-600">
-              Unpaid: {formatGBP(client.unpaidAmount)}
-            </p>
-          </div>
-        </div>
+        <StatGroup
+          variant="hours"
+          total={client.totalMinutes}
+          invoiced={client.billedMinutes}
+          uninvoiced={client.unbilledMinutes}
+          paid={client.paidMinutes}
+          unpaid={client.unpaidMinutes}
+        />
+        <StatGroup
+          variant="earnings"
+          total={client.totalEarned}
+          invoiced={client.billedAmount}
+          uninvoiced={client.unbilledAmount}
+          paid={client.paidAmount}
+          unpaid={client.unpaidAmount}
+        />
       </div>
 
       {client.addressLine1 && (
