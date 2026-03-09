@@ -113,7 +113,7 @@ export function EntryForm({
           id="notes"
           rows={3}
           {...register("notes")}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring resize-none"
+          className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-ring/30 resize-none"
         />
         {errors.notes && (
           <p className="text-sm text-destructive">{errors.notes.message}</p>
@@ -176,14 +176,14 @@ export function EntryForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           {isSubmitting ? "Saving..." : isEditing ? "Update Entry" : "Log Time"}
         </button>
         <button
           type="button"
           onClick={() => (onCancel ? onCancel() : router.back())}
-          className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent"
+          className="rounded-lg border border-input px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
         >
           Cancel
         </button>

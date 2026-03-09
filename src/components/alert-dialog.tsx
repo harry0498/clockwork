@@ -42,7 +42,7 @@ export function AlertDialog({
           type="button"
           onClick={onClose}
           disabled={loading}
-          className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent disabled:opacity-50"
+          className="rounded-lg border border-input px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
         >
           Cancel
         </button>
@@ -50,10 +50,10 @@ export function AlertDialog({
           type="button"
           onClick={handleConfirm}
           disabled={loading}
-          className={`rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 ${
+          className={`rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50 ${
             variant === "destructive"
               ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              : "bg-primary text-primary-foreground hover:opacity-90"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
           }`}
         >
           {loading ? "..." : confirmLabel}

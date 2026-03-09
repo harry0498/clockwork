@@ -60,10 +60,10 @@ export function DataTable<T>({
 
   return (
     <div>
-      <div className="overflow-x-auto rounded-md border border-border">
+      <div className="overflow-x-auto overflow-hidden rounded-lg border border-border shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/50">
+            <tr className="border-b border-border bg-muted">
               {selection && (
                 <th className="w-10 px-3 py-3">
                   <IndeterminateCheckbox
@@ -78,7 +78,7 @@ export function DataTable<T>({
               {allColumns.map((col, i) => (
                 <th
                   key={colKey(col, i)}
-                  className={`px-4 py-3 font-medium ${alignClass[col.align ?? "left"]} ${col.className ?? ""} ${col.hideOnMobile ? "hidden md:table-cell" : ""}`}
+                  className={`px-4 py-3 text-xs uppercase tracking-wide ${alignClass[col.align ?? "left"]} ${col.className ?? ""} ${col.hideOnMobile ? "hidden md:table-cell" : ""}`}
                 >
                   {col.header}
                 </th>
@@ -92,7 +92,10 @@ export function DataTable<T>({
                 ? selection.isSelectable(key)
                 : true;
               return (
-                <tr key={key} className="border-b border-border last:border-0">
+                <tr
+                  key={key}
+                  className="border-b border-border last:border-0 transition-colors hover:bg-muted/50"
+                >
                   {selection && (
                     <td className="w-10 px-3 py-3">
                       <IndeterminateCheckbox

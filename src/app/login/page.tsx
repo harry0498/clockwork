@@ -35,13 +35,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-sm space-y-6 p-6">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900">
+      <div className="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 shadow-2xl">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Clockwork</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Sign in to continue
-          </p>
+          <h1 className="text-2xl font-bold text-stone-900">Clockwork</h1>
+          <p className="text-stone-500 text-sm mt-1">Sign in to continue</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -52,7 +50,10 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-stone-700"
+            >
               Email
             </label>
             <input
@@ -60,7 +61,7 @@ export default function LoginPage() {
               type="email"
               autoComplete="email"
               {...register("email")}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-stone-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
             />
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -68,7 +69,10 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-stone-700"
+            >
               Password
             </label>
             <input
@@ -76,7 +80,7 @@ export default function LoginPage() {
               type="password"
               autoComplete="current-password"
               {...register("password")}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-stone-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
             />
             {errors.password && (
               <p className="text-sm text-destructive">
@@ -88,7 +92,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700/90 disabled:opacity-50"
           >
             {isSubmitting ? "Signing in..." : "Sign in"}
           </button>

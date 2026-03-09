@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
@@ -43,9 +44,12 @@ export function Dialog({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop dismiss */}
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop dismiss */}
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
       <div
-        className={`relative z-10 flex max-h-dvh w-full flex-col bg-background sm:rounded-lg sm:border sm:border-border sm:shadow-lg ${sizeClasses[size]}`}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div
+        className={`relative z-10 flex max-h-dvh w-full flex-col bg-background sm:rounded-xl sm:border sm:border-border sm:shadow-xl ${sizeClasses[size]}`}
         role="dialog"
         aria-modal="true"
       >
@@ -56,21 +60,7 @@ export function Dialog({
             onClick={onClose}
             className="rounded p-1 text-muted-foreground hover:text-foreground"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-              aria-label="Close"
-              role="img"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="h-5 w-5" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>

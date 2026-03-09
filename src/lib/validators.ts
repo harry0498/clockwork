@@ -50,11 +50,14 @@ export const entrySchema = z.object({
     .max(2000, "Notes must be 2,000 characters or fewer")
     .optional()
     .or(z.literal("")),
-  minutes: z
-    .number()
-    .int()
-    .min(1, "Minutes must be at least 1")
-    .max(1440, "Minutes cannot exceed 24 hours"),
+  minutes: z.preprocess(
+    (v) => (typeof v === "number" && Number.isNaN(v) ? undefined : v),
+    z
+      .number("Minutes is required")
+      .int("Minutes must be a whole number")
+      .min(1, "Minutes must be at least 1")
+      .max(1440, "Minutes cannot exceed 24 hours"),
+  ),
   ratePerHour: z
     .string()
     .regex(/^\d+(\.\d{1,2})?$/, "Enter a valid rate (e.g. 25 or 25.50)")

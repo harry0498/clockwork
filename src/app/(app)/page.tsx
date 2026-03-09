@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import Link from "next/link";
 import { getClients } from "@/actions/clients";
 import { getDashboardStats, getOnboardingStatus } from "@/actions/dashboard";
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">
           Tax year {taxYear.label}
         </p>
@@ -68,7 +69,7 @@ export default async function DashboardPage() {
             {remainingSteps.map((step) => (
               <div
                 key={step.num}
-                className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3"
+                className="flex items-center gap-3 rounded-lg border border-primary/20 bg-accent p-3"
               >
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-sm font-medium text-muted-foreground">
                   {step.num}
@@ -81,7 +82,7 @@ export default async function DashboardPage() {
                 </div>
                 <Link
                   href={step.href}
-                  className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:opacity-90"
+                  className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
                 >
                   {step.cta}
                 </Link>
@@ -149,7 +150,7 @@ function StatGroup({
   unpaid: string;
 }) {
   return (
-    <div className="rounded-lg border border-border p-4">
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="text-2xl font-bold">{total}</p>
       <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 text-sm">
@@ -222,7 +223,7 @@ function GettingStarted({
                 done
                   ? "border-border bg-muted/30"
                   : isNext
-                    ? "border-primary bg-primary/5"
+                    ? "border-primary/20 bg-accent"
                     : "border-border bg-muted/50"
               }`}
             >
@@ -234,25 +235,7 @@ function GettingStarted({
                       : "border border-border text-muted-foreground"
                   }`}
                 >
-                  {done ? (
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                      role="img"
-                      aria-label="Complete"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  ) : (
-                    step.num
-                  )}
+                  {done ? <Check className="h-4 w-4" /> : step.num}
                 </div>
                 <div className="flex-1">
                   <p
@@ -266,7 +249,7 @@ function GettingStarted({
                   {isNext && (
                     <Link
                       href={step.href}
-                      className="mt-3 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                      className="mt-3 inline-block rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
                     >
                       {step.cta}
                     </Link>
@@ -274,7 +257,7 @@ function GettingStarted({
                   {prereqUnmet && !done && (
                     <Link
                       href={step.href}
-                      className="mt-3 inline-block rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent"
+                      className="mt-3 inline-block rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent"
                     >
                       {step.cta}
                     </Link>

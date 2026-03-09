@@ -171,7 +171,7 @@ export function EntryTable({
   return (
     <div className="space-y-3">
       {someSelected && (
-        <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/50 px-4 py-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-lg bg-accent px-4 py-3 shadow-sm">
           <span className="text-sm font-medium">
             {selectedIds.size} selected
           </span>
@@ -179,21 +179,21 @@ export function EntryTable({
             <button
               type="button"
               onClick={handleBulkMark}
-              className="rounded-md border border-input bg-background px-3 py-1.5 text-sm hover:bg-accent"
+              className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm transition-colors hover:bg-accent"
             >
               Mark Invoiced
             </button>
             <button
               type="button"
               onClick={handleBulkUnmark}
-              className="rounded-md border border-input bg-background px-3 py-1.5 text-sm hover:bg-accent"
+              className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm transition-colors hover:bg-accent"
             >
               Unmark Invoiced
             </button>
             <button
               type="button"
               onClick={() => setBulkDeleteOpen(true)}
-              className="rounded-md bg-destructive px-3 py-1.5 text-sm text-destructive-foreground hover:opacity-90"
+              className="rounded-lg bg-destructive px-3 py-1.5 text-sm text-destructive-foreground shadow-sm transition-colors hover:bg-destructive/90"
             >
               Delete
             </button>

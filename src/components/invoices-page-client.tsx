@@ -42,14 +42,14 @@ export function InvoicesPageClient({
         <div className="flex items-center gap-2">
           <Link
             href="/invoices/template"
-            className="rounded-md px-4 py-2 text-sm font-medium shadow-[inset_0_0_0_1px_hsl(var(--input))] hover:bg-accent"
+            className="rounded-lg border border-input px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
           >
             Customise Template
           </Link>
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
           >
             New Invoice
           </button>

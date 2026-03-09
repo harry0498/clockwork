@@ -28,7 +28,7 @@ export function InvoicePdfInline({ invoiceId }: { invoiceId: string }) {
 
   if (error) {
     return (
-      <div className="flex aspect-[1/1.414] w-full items-center justify-center rounded-lg border border-border bg-muted/30 text-sm text-muted-foreground">
+      <div className="flex aspect-[1/1.414] w-full items-center justify-center rounded-xl border border-border shadow-sm bg-muted/30 text-sm text-muted-foreground">
         Failed to load preview
       </div>
     );
@@ -36,7 +36,7 @@ export function InvoicePdfInline({ invoiceId }: { invoiceId: string }) {
 
   if (!url) {
     return (
-      <div className="flex aspect-[1/1.414] w-full items-center justify-center rounded-lg border border-border bg-muted/30">
+      <div className="flex aspect-[1/1.414] w-full items-center justify-center rounded-xl border border-border shadow-sm bg-muted/30">
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
       </div>
     );
@@ -45,7 +45,7 @@ export function InvoicePdfInline({ invoiceId }: { invoiceId: string }) {
   return (
     <iframe
       src={`${url}#toolbar=0&navpanes=0&view=FitH`}
-      className="aspect-[1/1.414] w-full rounded-lg border border-border bg-white"
+      className="aspect-[1/1.414] w-full rounded-xl border border-border shadow-sm bg-white"
       title="Invoice preview"
     />
   );

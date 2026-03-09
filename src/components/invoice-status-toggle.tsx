@@ -24,7 +24,7 @@ export function InvoiceStatusToggle({
 
   if (currentStatus === "paid") {
     return (
-      <span className="inline-block rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+      <span className="inline-block rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
         Paid
       </span>
     );
@@ -41,7 +41,7 @@ export function InvoiceStatusToggle({
     <button
       type="button"
       onClick={handleClick}
-      className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+      className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
     >
       {statusLabels[currentStatus]}
     </button>

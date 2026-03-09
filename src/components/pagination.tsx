@@ -61,9 +61,9 @@ export function Pagination({
   const items = getPageItems(currentPage, pageCount);
 
   const linkClass =
-    "inline-flex h-9 min-w-9 items-center justify-center rounded-md border border-input px-3 text-sm hover:bg-accent disabled:pointer-events-none disabled:opacity-50";
+    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-input px-3 text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50";
   const activeClass =
-    "inline-flex h-9 min-w-9 items-center justify-center rounded-md bg-primary px-3 text-sm text-primary-foreground";
+    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg bg-primary px-3 text-sm text-primary-foreground shadow-sm";
 
   return (
     <nav className="flex items-center justify-center gap-1 pt-4">

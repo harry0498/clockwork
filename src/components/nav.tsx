@@ -1,9 +1,11 @@
 "use client";
 
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface OnboardingStatus {
   hasClients: boolean;
@@ -57,40 +59,43 @@ function NavLinks({
               onClick={onNavigate}
               className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-sidebar-muted text-white"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-white"
               }`}
             >
               {showStep && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-sidebar-foreground/50">
                   {link.step}
                 </span>
               )}
               {link.label}
               {isNextStep && !isActive && (
-                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
+                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-foreground" />
               )}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-border p-4 space-y-2">
-        <Link
-          href="/settings"
-          onClick={onNavigate}
-          className={`block text-sm ${
-            pathname === "/settings"
-              ? "font-medium text-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Settings
-        </Link>
+      <div className="border-t border-sidebar-muted p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <Link
+            href="/settings"
+            onClick={onNavigate}
+            className={`block text-sm ${
+              pathname === "/settings"
+                ? "font-medium text-white"
+                : "text-sidebar-foreground/60 hover:text-sidebar-foreground"
+            }`}
+          >
+            Settings
+          </Link>
+          <ThemeToggle />
+        </div>
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="w-full text-left text-sm text-sidebar-foreground/60 hover:text-sidebar-foreground"
         >
           Sign out
         </button>
@@ -129,30 +134,16 @@ export function Nav({
   return (
     <>
       {/* Mobile top bar */}
-      <div className="sticky top-0 z-40 flex items-center border-b border-border bg-muted/50 px-4 py-3 md:hidden">
+      <div className="sticky top-0 z-40 flex items-center bg-sidebar px-4 py-3 md:hidden">
         <button
           type="button"
           onClick={() => setDrawerOpen(true)}
-          className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="rounded p-1.5 text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-white"
           aria-label="Open menu"
         >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            role="img"
-            aria-label="Menu"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
+          <Menu className="h-5 w-5" />
         </button>
-        <Link href="/" className="ml-3 text-lg font-bold">
+        <Link href="/" className="ml-3 text-lg font-bold text-white">
           Clockwork
         </Link>
       </div>
@@ -162,15 +153,15 @@ export function Nav({
         <div className="fixed inset-0 z-50 md:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setDrawerOpen(false)}
             aria-label="Close menu"
           />
-          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col bg-background shadow-lg">
+          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground shadow-lg">
             <div className="flex items-center justify-between p-4">
               <Link
                 href="/"
-                className="text-lg font-bold"
+                className="text-lg font-bold text-white"
                 onClick={() => setDrawerOpen(false)}
               >
                 Clockwork
@@ -178,24 +169,10 @@ export function Nav({
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
-                className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="rounded p-1.5 text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-white"
                 aria-label="Close menu"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  role="img"
-                  aria-label="Close"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X className="h-5 w-5" />
               </button>
             </div>
             <NavLinks
@@ -207,9 +184,9 @@ export function Nav({
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex h-screen w-56 flex-col border-r border-border bg-muted/50">
+      <aside className="hidden md:flex h-screen w-56 flex-col bg-sidebar text-sidebar-foreground">
         <div className="p-4">
-          <Link href="/" className="text-lg font-bold">
+          <Link href="/" className="text-lg font-bold text-white">
             Clockwork
           </Link>
         </div>

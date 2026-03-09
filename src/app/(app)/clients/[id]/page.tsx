@@ -39,7 +39,7 @@ export default async function ClientDetailPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-border p-4">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <p className="text-sm text-muted-foreground">Hours</p>
           <p className="text-2xl font-bold">
             {formatMinutes(client.totalMinutes)}
@@ -59,7 +59,7 @@ export default async function ClientDetailPage({
             </p>
           </div>
         </div>
-        <div className="rounded-lg border border-border p-4">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <p className="text-sm text-muted-foreground">Earnings</p>
           <p className="text-2xl font-bold">{formatGBP(client.totalEarned)}</p>
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 text-sm">
@@ -80,7 +80,7 @@ export default async function ClientDetailPage({
       </div>
 
       {client.addressLine1 && (
-        <div className="rounded-lg border border-border p-4">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-1 text-sm text-muted-foreground">Address</p>
           <div className="text-sm">
             <p>{client.addressLine1}</p>
@@ -91,7 +91,7 @@ export default async function ClientDetailPage({
       )}
 
       {client.vatNumber && (
-        <div className="rounded-lg border border-border p-4">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-1 text-sm text-muted-foreground">VAT Number</p>
           <p className="text-sm">{client.vatNumber}</p>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -71,21 +72,13 @@ export function ActionMenu({ items }: { items: ActionMenuItem[] }) {
         onClick={toggle}
         className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
       >
-        <svg
-          className="h-4 w-4"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          role="img"
-          aria-label="Actions"
-        >
-          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
-        </svg>
+        <MoreVertical className="h-4 w-4" />
       </button>
       {open &&
         createPortal(
           <div
             ref={menuRef}
-            className="fixed z-50 w-44 rounded-md border border-border bg-popover py-1 shadow-md"
+            className="fixed z-50 w-44 rounded-xl border border-border bg-popover py-1.5 shadow-lg"
             style={{
               top: pos.top,
               left: pos.left,
@@ -97,7 +90,7 @@ export function ActionMenu({ items }: { items: ActionMenuItem[] }) {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`block px-3 py-2 text-sm hover:bg-muted ${item.variant === "destructive" ? "text-destructive" : ""}`}
+                  className={`block px-3 py-2 text-sm transition-colors hover:bg-accent ${item.variant === "destructive" ? "text-destructive" : ""}`}
                   onClick={() => setOpen(false)}
                 >
                   {item.label}
@@ -107,7 +100,7 @@ export function ActionMenu({ items }: { items: ActionMenuItem[] }) {
                   key={item.label}
                   type="button"
                   onClick={() => handleClick(item)}
-                  className={`w-full px-3 py-2 text-left text-sm hover:bg-muted ${item.variant === "destructive" ? "text-destructive" : ""}`}
+                  className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-accent ${item.variant === "destructive" ? "text-destructive" : ""}`}
                 >
                   {item.label}
                 </button>

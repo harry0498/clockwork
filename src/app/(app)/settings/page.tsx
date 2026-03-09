@@ -7,7 +7,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-8 w-full max-w-md">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
 
       <SettingsForm profile={profile} />
 

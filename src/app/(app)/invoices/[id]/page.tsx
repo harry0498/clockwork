@@ -40,24 +40,24 @@ export default async function InvoiceDetailPage({
         {/* Invoice details — scrollable left column */}
         <div className="flex-1 min-w-0 space-y-6">
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg border border-border p-4">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <p className="text-sm text-muted-foreground">Issued</p>
               <p className="font-medium">{invoice.issuedAt}</p>
             </div>
-            <div className="rounded-lg border border-border p-4">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <p className="text-sm text-muted-foreground">Total</p>
               <p className="text-xl font-bold">
                 {formatGBP(invoice.totalAmount)}
               </p>
             </div>
-            <div className="rounded-lg border border-border p-4">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <p className="text-sm text-muted-foreground">Paid</p>
               <p className="font-medium">{invoice.paidAt ?? "—"}</p>
             </div>
           </div>
 
           {invoice.client.addressLine1 && (
-            <div className="rounded-lg border border-border p-4">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <p className="text-sm text-muted-foreground mb-1">Bill To</p>
               <p className="font-medium">{invoice.client.name}</p>
               {invoice.client.email && (

@@ -192,7 +192,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           {isSubmitting
             ? "Saving..."
@@ -203,7 +203,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
         <button
           type="button"
           onClick={() => (onCancel ? onCancel() : router.back())}
-          className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent"
+          className="rounded-lg border border-input px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
         >
           Cancel
         </button>

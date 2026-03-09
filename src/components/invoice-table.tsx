@@ -8,8 +8,8 @@ import type { InvoiceWithClient } from "@/lib/types";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
-  sent: "bg-blue-100 text-blue-800",
-  paid: "bg-green-100 text-green-800",
+  sent: "bg-indigo-100 text-indigo-700",
+  paid: "bg-emerald-100 text-emerald-700",
 };
 
 async function downloadInvoicePdf(invoiceId: string) {
@@ -108,7 +108,7 @@ export function DownloadPdfButton({ invoiceId }: { invoiceId: string }) {
     <button
       type="button"
       onClick={() => downloadInvoicePdf(invoiceId)}
-      className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent"
+      className="rounded-lg border border-input px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
     >
       Download PDF
     </button>
