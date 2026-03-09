@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { deleteInvoice } from "@/actions/invoices";
 import { ActionMenu } from "@/components/action-menu";
 import { type Column, DataTable } from "@/components/data-table";
 import { formatGBP } from "@/lib/tax-year";
@@ -29,7 +28,13 @@ async function downloadInvoicePdf(invoiceId: string) {
   URL.revokeObjectURL(url);
 }
 
-export function InvoiceTable({ invoices }: { invoices: InvoiceWithClient[] }) {
+export function InvoiceTable({
+  invoices,
+  onDelete,
+}: {
+  invoices: InvoiceWithClient[];
+  onDelete?: (invoice: InvoiceWithClient) => void;
+}) {
   const columns: Column<InvoiceWithClient>[] = [
     {
       header: "Number",
@@ -85,10 +90,8 @@ export function InvoiceTable({ invoices }: { invoices: InvoiceWithClient[] }) {
             },
             {
               label: "Delete",
-              onClick: () => deleteInvoice(inv.id),
+              onClick: onDelete ? () => onDelete(inv) : undefined,
               variant: "destructive",
-              confirm:
-                "Delete this invoice? Linked time entries will be unlinked.",
             },
           ]}
         />

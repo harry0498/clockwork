@@ -10,7 +10,7 @@ import { inputClassName } from "@/lib/constants";
 import type { Client } from "@/lib/types";
 import { type ClientInput, clientSchema } from "@/lib/validators";
 
-interface ClientFormProps {
+export interface ClientFormProps {
   client?: Pick<
     Client,
     | "id"
@@ -22,9 +22,11 @@ interface ClientFormProps {
     | "postcode"
     | "vatNumber"
   >;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function ClientForm({ client }: ClientFormProps) {
+export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
   const router = useRouter();
   const [error, setError] = useState("");
   const isEditing = !!client;
@@ -54,8 +56,12 @@ export function ClientForm({ client }: ClientFormProps) {
       } else {
         await createClient(data);
       }
-      router.push(isEditing ? `/clients/${client.id}` : "/clients");
       router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push(isEditing ? `/clients/${client.id}` : "/clients");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     }
@@ -201,7 +207,7 @@ export function ClientForm({ client }: ClientFormProps) {
         </button>
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => (onCancel ? onCancel() : router.back())}
           className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent"
         >
           Cancel

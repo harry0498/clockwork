@@ -11,15 +11,22 @@ import { todayISO } from "@/lib/tax-year";
 import type { ClientPick, TimeEntry } from "@/lib/types";
 import { type EntryInput, entrySchema } from "@/lib/validators";
 
-interface EntryFormProps {
+export interface EntryFormProps {
   clients: ClientPick[];
   entry?: Pick<
     TimeEntry,
     "id" | "clientId" | "title" | "notes" | "minutes" | "ratePerHour" | "date"
   >;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function EntryForm({ clients, entry }: EntryFormProps) {
+export function EntryForm({
+  clients,
+  entry,
+  onSuccess,
+  onCancel,
+}: EntryFormProps) {
   const router = useRouter();
   const [error, setError] = useState("");
   const isEditing = !!entry;
@@ -48,8 +55,12 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
       } else {
         await createEntry(data);
       }
-      router.push("/entries");
       router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push("/entries");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     }
@@ -176,7 +187,7 @@ export function EntryForm({ clients, entry }: EntryFormProps) {
         </button>
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => (onCancel ? onCancel() : router.back())}
           className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent"
         >
           Cancel

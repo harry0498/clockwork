@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteClient } from "@/actions/clients";
+import Link from "next/link";
 import { ActionMenu } from "@/components/action-menu";
 import { type Column, DataTable } from "@/components/data-table";
 import { formatGBP, formatMinutes } from "@/lib/tax-year";
@@ -14,9 +14,25 @@ interface ClientWithStats {
   unbilledAmount: number;
 }
 
-export function ClientTable({ clients }: { clients: ClientWithStats[] }) {
+export function ClientTable({
+  clients,
+  onEdit,
+  onDelete,
+}: {
+  clients: ClientWithStats[];
+  onEdit?: (client: ClientWithStats) => void;
+  onDelete?: (client: ClientWithStats) => void;
+}) {
   const columns: Column<ClientWithStats>[] = [
-    { header: "Name", accessor: "name", className: "font-medium" },
+    {
+      header: "Name",
+      accessor: (e) => (
+        <Link href={`/clients/${e.id}`} className="hover:underline">
+          {e.name}
+        </Link>
+      ),
+      className: "font-medium",
+    },
     {
       header: "Email",
       accessor: (c) => (
@@ -50,12 +66,15 @@ export function ClientTable({ clients }: { clients: ClientWithStats[] }) {
       actions={(c) => (
         <ActionMenu
           items={[
-            { label: "Edit", href: `/clients/${c.id}/edit` },
+            {
+              label: "Edit",
+              onClick: onEdit ? () => onEdit(c) : undefined,
+              href: onEdit ? undefined : `/clients/${c.id}/edit`,
+            },
             {
               label: "Delete",
-              onClick: () => deleteClient(c.id),
+              onClick: onDelete ? () => onDelete(c) : undefined,
               variant: "destructive",
-              confirm: `Delete client "${c.name}"? This cannot be undone.`,
             },
           ]}
         />

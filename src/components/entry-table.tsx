@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { deleteEntry, toggleManuallyInvoiced } from "@/actions/entries";
+import { toggleManuallyInvoiced } from "@/actions/entries";
 import { ActionMenu } from "@/components/action-menu";
 import { type Column, DataTable } from "@/components/data-table";
 import { EmptyState } from "@/components/empty-state";
@@ -12,21 +12,34 @@ type Entry = Pick<
   TimeEntryWithClient,
   | "id"
   | "title"
+  | "notes"
   | "minutes"
   | "ratePerHour"
   | "date"
+  | "clientId"
   | "invoiceId"
   | "manuallyInvoiced"
   | "client"
 >;
 
-export function EntryTable({ entries }: { entries: Entry[] }) {
+export function EntryTable({
+  entries,
+  onEdit,
+  onDelete,
+  onNew,
+}: {
+  entries: Entry[];
+  onEdit?: (entry: Entry) => void;
+  onDelete?: (entry: Entry) => void;
+  onNew?: () => void;
+}) {
   if (entries.length === 0) {
     return (
       <EmptyState
         message="No entries for this period."
         actionLabel="Log Time"
-        actionHref="/entries/new"
+        onAction={onNew}
+        actionHref={onNew ? undefined : "/entries/new"}
       />
     );
   }
@@ -98,7 +111,8 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
             items={[
               {
                 label: "Edit",
-                href: `/entries/new?id=${entry.id}`,
+                onClick: onEdit ? () => onEdit(entry) : undefined,
+                href: onEdit ? undefined : `/entries/new?id=${entry.id}`,
                 hidden: entry.manuallyInvoiced,
               },
               {
@@ -109,9 +123,8 @@ export function EntryTable({ entries }: { entries: Entry[] }) {
               },
               {
                 label: "Delete",
-                onClick: () => deleteEntry(entry.id),
+                onClick: onDelete ? () => onDelete(entry) : undefined,
                 variant: "destructive",
-                confirm: "Delete this entry?",
                 hidden: entry.manuallyInvoiced,
               },
             ]}

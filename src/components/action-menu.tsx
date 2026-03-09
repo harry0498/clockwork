@@ -9,7 +9,6 @@ export interface ActionMenuItem {
   label: string;
   href?: string;
   onClick?: () => void | Promise<void>;
-  confirm?: string;
   variant?: "destructive";
   hidden?: boolean;
 }
@@ -58,7 +57,6 @@ export function ActionMenu({ items }: { items: ActionMenuItem[] }) {
 
   async function handleClick(item: ActionMenuItem) {
     setOpen(false);
-    if (item.confirm && !confirm(item.confirm)) return;
     if (item.onClick) {
       await item.onClick();
       router.refresh();

@@ -116,6 +116,22 @@ export async function deleteEntry(id: string) {
   revalidatePath("/");
 }
 
+export async function getUninvoicedEntriesForClient(clientId: string) {
+  const entries = await getEntries({
+    clientId,
+    uninvoicedOnly: true,
+    sortBy: "date",
+    sortDir: "asc",
+  });
+  return entries.map((e) => ({
+    id: e.id,
+    title: e.title,
+    minutes: e.minutes,
+    ratePerHour: e.ratePerHour,
+    date: e.date,
+  }));
+}
+
 export async function toggleManuallyInvoiced(id: string) {
   const session = await requireSession();
 

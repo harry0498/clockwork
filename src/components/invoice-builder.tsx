@@ -23,9 +23,11 @@ type InvoiceEntry = Pick<
 export function InvoiceBuilder({
   clients,
   getEntriesForClient,
+  onSuccess,
 }: {
   clients: ClientPick[];
   getEntriesForClient: (clientId: string) => Promise<InvoiceEntry[]>;
+  onSuccess?: () => void;
 }) {
   const router = useRouter();
   const [clientId, setClientId] = useState("");
@@ -83,8 +85,12 @@ export function InvoiceBuilder({
         entryIds: Array.from(selectedIds),
         issuedAt: todayISO(),
       });
-      router.push("/invoices");
       router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push("/invoices");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setLoading(false);
@@ -116,11 +122,13 @@ export function InvoiceBuilder({
 
       {entries.length > 0 && (
         <>
-          <DataTable
-            columns={invoiceColumns(selectedIds, toggleAll, toggleEntry)}
-            data={entries}
-            keyExtractor={(e) => e.id}
-          />
+          <div className="max-h-96 overflow-y-auto rounded-lg border border-border">
+            <DataTable
+              columns={invoiceColumns(selectedIds, toggleAll, toggleEntry)}
+              data={entries}
+              keyExtractor={(e) => e.id}
+            />
+          </div>
 
           <div className="flex items-center justify-between rounded-lg border border-border p-4">
             <div>

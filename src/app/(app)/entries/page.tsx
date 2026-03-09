@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { getClients } from "@/actions/clients";
 import { getEntries } from "@/actions/entries";
 import { ClientFilterClient } from "@/components/client-filter";
-import { EntryTable } from "@/components/entry-table";
+import { EntriesPageClient } from "@/components/entries-page-client";
 import { TaxYearFilter } from "@/components/tax-year-filter";
 import { getCurrentTaxYearStart } from "@/lib/tax-year";
 
@@ -23,19 +22,7 @@ export default async function EntriesPage({
   ]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Time Entries</h1>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/entries/new"
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-          >
-            New Entry
-          </Link>
-        </div>
-      </div>
-
+    <EntriesPageClient entries={entries} clients={clients}>
       <div className="flex flex-wrap items-center gap-3">
         <TaxYearFilter basePath="/entries" />
         <ClientFilterClient
@@ -44,8 +31,6 @@ export default async function EntriesPage({
           currentClientId={clientId}
         />
       </div>
-
-      <EntryTable entries={entries} />
-    </div>
+    </EntriesPageClient>
   );
 }

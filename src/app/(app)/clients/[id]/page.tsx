@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getClientWithStats } from "@/actions/clients";
-import { DeleteClientButton } from "@/components/delete-client-button";
+import { ClientDetailActions } from "@/components/client-detail-actions";
 import { formatGBP, formatMinutes } from "@/lib/tax-year";
 
 export default async function ClientDetailPage({
@@ -25,15 +24,18 @@ export default async function ClientDetailPage({
             <p className="text-muted-foreground">{client.email}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/clients/${client.id}/edit`}
-            className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-accent"
-          >
-            Edit
-          </Link>
-          <DeleteClientButton clientId={client.id} clientName={client.name} />
-        </div>
+        <ClientDetailActions
+          client={{
+            id: client.id,
+            name: client.name,
+            email: client.email,
+            addressLine1: client.addressLine1,
+            addressLine2: client.addressLine2,
+            county: client.county,
+            postcode: client.postcode,
+            vatNumber: client.vatNumber,
+          }}
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
