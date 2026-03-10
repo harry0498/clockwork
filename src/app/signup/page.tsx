@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { signup } from "@/actions/auth";
 import { Logo } from "@/components/logo";
@@ -30,21 +29,7 @@ export default function SignupPage() {
       return;
     }
 
-    const signInResult = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-    });
-
-    if (signInResult?.error) {
-      setError("root", {
-        message: "Account created but sign-in failed. Please sign in manually.",
-      });
-      return;
-    }
-
-    router.push("/");
-    router.refresh();
+    router.push("/login?registered=1");
   }
 
   const inputClassName =

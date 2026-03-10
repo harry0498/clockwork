@@ -31,24 +31,19 @@ export async function signup(
     return { success: false, error: parsed.error.issues[0].message };
   }
 
-  const existing = await db.query.users.findFirst({
-    where: eq(users.email, parsed.data.email),
-  });
-  if (existing) {
-    return {
-      success: false,
-      error: "An account with this email already exists.",
-    };
-  }
-
   const passwordHash = await hash(parsed.data.password, 12);
 
-  await db.insert(users).values({
-    name: parsed.data.name,
-    email: parsed.data.email,
-    passwordHash,
-  });
+  try {
+    await db.insert(users).values({
+      name: parsed.data.name,
+      email: parsed.data.email,
+      passwordHash,
+    });
+  } catch {
+    // Silently ignore duplicate email to prevent enumeration
+  }
 
+  // Always return success to prevent email enumeration
   return { success: true };
 }
 

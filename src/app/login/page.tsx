@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { Logo } from "@/components/logo";
@@ -12,6 +12,8 @@ const TWO_FA_PREFIX = "2FA_REQUIRED:";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const registered = searchParams.get("registered");
 
   const {
     register,
@@ -62,6 +64,12 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {registered && (
+            <div className="bg-emerald-50 text-emerald-700 text-sm p-3 rounded-md">
+              If that email is available, your account has been created. Please
+              sign in.
+            </div>
+          )}
           {errors.root && (
             <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
               {errors.root.message}
