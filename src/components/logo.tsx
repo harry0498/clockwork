@@ -1,0 +1,24 @@
+export function Logo({ size = 20 }: { size?: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      aria-hidden="true"
+    >
+      <circle cx="16" cy="16" r="15" fill="#4338ca" />
+      <g fill="#fff">
+        <rect x="14.5" y="6" width="3" height="11" rx="1.5" />
+        <rect x="14.5" y="14" width="9" height="3" rx="1.5" />
+      </g>
+      <circle cx="16" cy="16" r="2.5" fill="#fff" />
+      <g fill="#4338ca">
+        <rect x="14.5" y="1" width="3" height="4" rx="1" />
+        <rect x="14.5" y="27" width="3" height="4" rx="1" />
+        <rect x="1" y="14.5" width="4" height="3" rx="1" />
+        <rect x="27" y="14.5" width="4" height="3" rx="1" />
+      </g>
+    </svg>
+  );
+}

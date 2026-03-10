@@ -1,6 +1,7 @@
 import { getProfile } from "@/actions/settings";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { SettingsForm } from "@/components/settings-form";
+import { TwoFactorSettings } from "@/components/two-factor-settings";
 
 export default async function SettingsPage() {
   const profile = await getProfile();
@@ -14,6 +15,13 @@ export default async function SettingsPage() {
       <div className="border-t border-border pt-8">
         <h2 className="text-lg font-semibold mb-4">Change Password</h2>
         <ChangePasswordForm />
+      </div>
+
+      <div className="border-t border-border pt-8">
+        <h2 className="text-lg font-semibold mb-4">
+          Two-Factor Authentication
+        </h2>
+        <TwoFactorSettings />
       </div>
     </div>
   );

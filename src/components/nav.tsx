@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 interface OnboardingStatus {
@@ -143,7 +144,11 @@ export function Nav({
         >
           <Menu className="h-5 w-5" />
         </button>
-        <Link href="/" className="ml-3 text-lg font-bold text-white">
+        <Link
+          href="/"
+          className="ml-3 flex items-center gap-2 text-lg font-bold text-white"
+        >
+          <Logo />
           Clockwork
         </Link>
       </div>
@@ -161,9 +166,10 @@ export function Nav({
             <div className="flex items-center justify-between p-4">
               <Link
                 href="/"
-                className="text-lg font-bold text-white"
+                className="flex items-center gap-2 text-lg font-bold text-white"
                 onClick={() => setDrawerOpen(false)}
               >
+                <Logo />
                 Clockwork
               </Link>
               <button
@@ -186,7 +192,11 @@ export function Nav({
       {/* Desktop sidebar */}
       <aside className="hidden md:flex h-screen w-56 flex-col bg-sidebar text-sidebar-foreground">
         <div className="p-4">
-          <Link href="/" className="text-lg font-bold text-white">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-lg font-bold text-white"
+          >
+            <Logo />
             Clockwork
           </Link>
         </div>

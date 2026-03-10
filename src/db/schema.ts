@@ -32,6 +32,20 @@ export const users = pgTable("users", {
   accountNumber: varchar("account_number", { length: 20 }),
   sortCode: varchar("sort_code", { length: 10 }),
   invoiceTemplate: text("invoice_template"),
+  twoFactorMethod: varchar("two_factor_method", { length: 10 }),
+  totpSecret: text("totp_secret"),
+  backupCodes: text("backup_codes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const verificationTokens = pgTable("verification_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 20 }).notNull(),
+  tokenHash: varchar("token_hash", { length: 255 }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -89,7 +103,18 @@ export const usersRelations = relations(users, ({ many }) => ({
   clients: many(clients),
   timeEntries: many(timeEntries),
   invoices: many(invoices),
+  verificationTokens: many(verificationTokens),
 }));
+
+export const verificationTokensRelations = relations(
+  verificationTokens,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [verificationTokens.userId],
+      references: [users.id],
+    }),
+  }),
+);
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
   user: one(users, { fields: [clients.userId], references: [users.id] }),

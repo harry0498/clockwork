@@ -138,6 +138,62 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
+// Signup
+export const signupSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, "Name is required")
+      .max(255, "Name must be 255 characters or fewer"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type SignupInput = z.infer<typeof signupSchema>;
+
+// Forgot password
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+// Reset password
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, "Token is required"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+// 2FA verification
+export const verifyTwoFactorSchema = z.object({
+  pendingToken: z.string().min(1),
+  code: z.string().min(1, "Code is required"),
+  isBackupCode: z.boolean().default(false),
+});
+
+export type VerifyTwoFactorInput = z.infer<typeof verifyTwoFactorSchema>;
+
+// TOTP setup verification
+export const totpSetupSchema = z.object({
+  code: z.string().length(6, "Enter the 6-digit code from your authenticator"),
+  secret: z.string().min(1),
+});
+
+export type TotpSetupInput = z.infer<typeof totpSetupSchema>;
+
 // Change password
 export const changePasswordSchema = z
   .object({

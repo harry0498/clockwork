@@ -458,6 +458,9 @@ export function InvoicePdfPreviewDoc({ config, profile }: PreviewDocProps) {
     accountNumber: profile.accountNumber,
     sortCode: profile.sortCode,
     invoiceTemplate: JSON.stringify(config),
+    twoFactorMethod: null,
+    totpSecret: null,
+    backupCodes: null,
     createdAt: new Date(),
   };
 

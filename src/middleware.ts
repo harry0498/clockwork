@@ -4,19 +4,24 @@ import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
-  const isLoginPage = request.nextUrl.pathname === "/login";
-  const isAuthApi = request.nextUrl.pathname.startsWith("/api/auth");
+  const pathname = request.nextUrl.pathname;
+  const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const isPublicPage =
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password" ||
+    pathname === "/verify-2fa";
+  const isAuthApi = pathname.startsWith("/api/auth");
 
   if (isAuthApi) {
     return NextResponse.next();
   }
 
-  if (!token && !isLoginPage) {
+  if (!token && !isAuthPage && !isPublicPage) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (token && isLoginPage) {
+  if (token && isAuthPage) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
