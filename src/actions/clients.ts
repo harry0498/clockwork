@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { clients, invoices, timeEntries } from "@/db/schema";
@@ -26,10 +26,11 @@ export async function getClientsWithStats() {
       email: clients.email,
       totalMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
       totalEarned: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
-      unbilledAmount: sql<number>`coalesce(sum(case when ${timeEntries.invoiceId} is null and ${timeEntries.manuallyInvoiced} = false then ${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0 else 0 end), 0)`,
+      unbilledAmount: sql<number>`coalesce(sum(case when (${timeEntries.invoiceId} is null or ${invoices.status} = 'draft') and ${timeEntries.manuallyInvoiced} = false then ${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0 else 0 end), 0)`,
     })
     .from(clients)
     .leftJoin(timeEntries, eq(clients.id, timeEntries.clientId))
+    .leftJoin(invoices, eq(timeEntries.invoiceId, invoices.id))
     .where(eq(clients.userId, session.user.id))
     .groupBy(clients.id, clients.name, clients.email)
     .orderBy(clients.name);
@@ -67,10 +68,11 @@ export async function getClientsWithStatsPaginated(options: {
         email: clients.email,
         totalMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
         totalEarned: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
-        unbilledAmount: sql<number>`coalesce(sum(case when ${timeEntries.invoiceId} is null and ${timeEntries.manuallyInvoiced} = false then ${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0 else 0 end), 0)`,
+        unbilledAmount: sql<number>`coalesce(sum(case when (${timeEntries.invoiceId} is null or ${invoices.status} = 'draft') and ${timeEntries.manuallyInvoiced} = false then ${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0 else 0 end), 0)`,
       })
       .from(clients)
       .leftJoin(timeEntries, eq(clients.id, timeEntries.clientId))
+      .leftJoin(invoices, eq(timeEntries.invoiceId, invoices.id))
       .where(eq(clients.userId, session.user.id))
       .groupBy(clients.id, clients.name, clients.email)
       .orderBy(clients.name)
@@ -125,19 +127,22 @@ export async function getClientWithStats(id: string) {
     .from(timeEntries)
     .where(baseWhere);
 
-  const [unbilledStats] = await db
+  const [billedStats] = await db
     .select({
-      unbilledMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
-      unbilledAmount: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
+      billedMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
+      billedAmount: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
     })
     .from(timeEntries)
-    .where(
-      and(
-        baseWhere,
-        isNull(timeEntries.invoiceId),
-        eq(timeEntries.manuallyInvoiced, false),
-      ),
-    );
+    .innerJoin(invoices, eq(timeEntries.invoiceId, invoices.id))
+    .where(and(baseWhere, inArray(invoices.status, ["sent", "paid"])));
+
+  const [manualStats] = await db
+    .select({
+      manualMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
+      manualAmount: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
+    })
+    .from(timeEntries)
+    .where(and(baseWhere, eq(timeEntries.manuallyInvoiced, true)));
 
   const [paidStats] = await db
     .select({
@@ -150,10 +155,10 @@ export async function getClientWithStats(id: string) {
 
   const totalMinutes = Number(allStats.totalMinutes);
   const totalEarned = Number(allStats.totalEarned);
-  const unbilledMinutes = Number(unbilledStats.unbilledMinutes);
-  const unbilledAmount = Number(unbilledStats.unbilledAmount);
-  const billedMinutes = totalMinutes - unbilledMinutes;
-  const billedAmount = totalEarned - unbilledAmount;
+  const billedMinutes =
+    Number(billedStats.billedMinutes) + Number(manualStats.manualMinutes);
+  const billedAmount =
+    Number(billedStats.billedAmount) + Number(manualStats.manualAmount);
   const paidMinutes = Number(paidStats.paidMinutes);
   const paidAmount = Number(paidStats.paidAmount);
 
@@ -161,14 +166,12 @@ export async function getClientWithStats(id: string) {
     ...client,
     totalMinutes,
     totalEarned,
-    unbilledMinutes,
-    unbilledAmount,
+    unbilledMinutes: totalMinutes - billedMinutes,
+    unbilledAmount: totalEarned - billedAmount,
     billedMinutes,
     billedAmount,
     paidMinutes,
     paidAmount,
-    unpaidMinutes: billedMinutes - paidMinutes,
-    unpaidAmount: billedAmount - paidAmount,
   };
 }
 

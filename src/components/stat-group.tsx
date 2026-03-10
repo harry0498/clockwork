@@ -1,104 +1,79 @@
 import { formatGBP, formatMinutes } from "@/lib/tax-year";
 
-function BreakdownRow({
-  leftLabel,
-  leftValue,
-  leftRaw,
-  rightLabel,
-  rightValue,
-  rightRaw,
-  leftColor,
-  rightColor,
-  leftBarColor,
-  rightBarColor,
-}: {
-  leftLabel: string;
-  leftValue: string;
-  leftRaw: number;
-  rightLabel: string;
-  rightValue: string;
-  rightRaw: number;
-  leftColor: string;
-  rightColor: string;
-  leftBarColor: string;
-  rightBarColor: string;
-}) {
-  const total = leftRaw + rightRaw;
-  const leftPercent = total > 0 ? (leftRaw / total) * 100 : 50;
-
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-baseline justify-between">
-        <div>
-          <p className="text-xs text-muted-foreground">{leftLabel}</p>
-          <p className={`text-sm font-semibold ${leftColor}`}>{leftValue}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">{rightLabel}</p>
-          <p className={`text-sm font-semibold ${rightColor}`}>{rightValue}</p>
-        </div>
-      </div>
-      <div className="flex h-1.5 overflow-hidden rounded-full bg-muted">
-        <div
-          className={`${leftBarColor} rounded-l-full transition-all`}
-          style={{ width: `${leftPercent}%` }}
-        />
-        <div
-          className={`${rightBarColor} rounded-r-full transition-all`}
-          style={{ width: `${100 - leftPercent}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
 export function StatGroup({
   variant,
   total,
   invoiced,
   uninvoiced,
   paid,
-  unpaid,
 }: {
   variant: "hours" | "earnings";
   total: number;
   invoiced: number;
   uninvoiced: number;
   paid: number;
-  unpaid: number;
 }) {
   const fmt = variant === "hours" ? formatMinutes : formatGBP;
   const label = variant === "hours" ? "Hours" : "Earnings";
+  const awaitingPayment = invoiced - paid;
+
+  const segments = [
+    {
+      label: "Uninvoiced",
+      value: uninvoiced,
+      color: "bg-amber-500",
+      dot: "bg-amber-500",
+    },
+    {
+      label: "Invoiced",
+      value: awaitingPayment,
+      color: "bg-indigo-500",
+      dot: "bg-indigo-500",
+    },
+    {
+      label: "Paid",
+      value: paid,
+      color: "bg-emerald-500",
+      dot: "bg-emerald-500",
+    },
+  ];
+
+  const barTotal = uninvoiced + awaitingPayment + paid;
+
+  function segmentWidth(value: number): string {
+    if (barTotal === 0) return "0%";
+    const pct = (value / barTotal) * 100;
+    if (value > 0 && pct < 1) return "1%";
+    return `${pct}%`;
+  }
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="text-2xl font-bold">{fmt(total)}</p>
-      <div className="mt-3 space-y-3 border-t border-border pt-3">
-        <BreakdownRow
-          leftLabel="Invoiced"
-          leftValue={fmt(invoiced)}
-          leftRaw={invoiced}
-          rightLabel="Uninvoiced"
-          rightValue={fmt(uninvoiced)}
-          rightRaw={uninvoiced}
-          leftColor="text-green-600 dark:text-green-400"
-          rightColor="text-amber-600 dark:text-amber-400"
-          leftBarColor="bg-green-600"
-          rightBarColor="bg-amber-500"
-        />
-        <BreakdownRow
-          leftLabel="Paid"
-          leftValue={fmt(paid)}
-          leftRaw={paid}
-          rightLabel="Unpaid"
-          rightValue={fmt(unpaid)}
-          rightRaw={unpaid}
-          leftColor="text-emerald-600 dark:text-emerald-400"
-          rightColor="text-red-600 dark:text-red-400"
-          leftBarColor="bg-emerald-600"
-          rightBarColor="bg-red-500"
-        />
+
+      <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-muted">
+        {segments.map((seg) => (
+          <div
+            key={seg.label}
+            className={`${seg.color} transition-all`}
+            style={{ width: segmentWidth(seg.value) }}
+          />
+        ))}
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {segments.map((seg) => (
+          <div key={seg.label}>
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`inline-block h-2 w-2 rounded-full ${seg.dot}`}
+              />
+              <span className="text-xs text-muted-foreground">{seg.label}</span>
+            </div>
+            <p className="mt-0.5 text-sm font-semibold">{fmt(seg.value)}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

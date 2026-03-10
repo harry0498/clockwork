@@ -51,7 +51,6 @@ export default async function DashboardPage() {
           invoiced={stats.billedMinutes}
           uninvoiced={stats.unbilledMinutes}
           paid={stats.paidMinutes}
-          unpaid={stats.unpaidMinutes}
         />
         <StatGroup
           variant="earnings"
@@ -59,7 +58,6 @@ export default async function DashboardPage() {
           invoiced={stats.billedAmount}
           uninvoiced={stats.unbilledAmount}
           paid={stats.paidAmount}
-          unpaid={stats.unpaidAmount}
         />
       </div>
 

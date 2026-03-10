@@ -45,7 +45,6 @@ export default async function ClientDetailPage({
           invoiced={client.billedMinutes}
           uninvoiced={client.unbilledMinutes}
           paid={client.paidMinutes}
-          unpaid={client.unpaidMinutes}
         />
         <StatGroup
           variant="earnings"
@@ -53,7 +52,6 @@ export default async function ClientDetailPage({
           invoiced={client.billedAmount}
           uninvoiced={client.unbilledAmount}
           paid={client.paidAmount}
-          unpaid={client.unpaidAmount}
         />
       </div>
 
