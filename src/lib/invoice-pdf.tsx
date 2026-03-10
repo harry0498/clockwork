@@ -461,6 +461,7 @@ export function InvoicePdfPreviewDoc({ config, profile }: PreviewDocProps) {
     twoFactorMethod: null,
     totpSecret: null,
     backupCodes: null,
+    termsAcceptedAt: null,
     createdAt: new Date(),
   };
 

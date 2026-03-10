@@ -3,23 +3,46 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { signup } from "@/actions/auth";
 import { Logo } from "@/components/logo";
+import { PrivacyContent } from "@/components/privacy-content";
+import { TermsContent } from "@/components/terms-content";
 import { type SignupInput, signupSchema } from "@/lib/validators";
+
+const inputClassName =
+  "w-full rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-card-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30";
 
 export default function SignupPage() {
   const router = useRouter();
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      acceptTerms: undefined as unknown as true,
+    },
   });
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el || hasScrolledToBottom) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
+      setHasScrolledToBottom(true);
+    }
+  }, [hasScrolledToBottom]);
 
   async function onSubmit(data: SignupInput) {
     const result = await signup(data);
@@ -32,18 +55,19 @@ export default function SignupPage() {
     router.push("/login?registered=1");
   }
 
-  const inputClassName =
-    "w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 shadow-sm outline-none transition-colors placeholder:text-stone-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30";
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900">
-      <div className="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 dark:from-[#08071a] dark:via-[#100e28] dark:to-[#08071a] px-4 py-8">
+      <div className="w-full max-w-sm space-y-6 rounded-2xl bg-card p-8 shadow-2xl">
         <div className="text-center">
           <div className="flex items-center justify-center gap-2">
             <Logo size={28} />
-            <h1 className="text-2xl font-bold text-stone-900">Clockwork</h1>
+            <h1 className="text-2xl font-bold text-card-foreground">
+              Clockwork
+            </h1>
           </div>
-          <p className="text-stone-500 text-sm mt-1">Create your account</p>
+          <p className="text-muted-foreground text-sm mt-1">
+            Create your account
+          </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -56,7 +80,7 @@ export default function SignupPage() {
           <div className="space-y-2">
             <label
               htmlFor="name"
-              className="text-sm font-medium text-stone-700"
+              className="text-sm font-medium text-card-foreground"
             >
               Name
             </label>
@@ -75,7 +99,7 @@ export default function SignupPage() {
           <div className="space-y-2">
             <label
               htmlFor="email"
-              className="text-sm font-medium text-stone-700"
+              className="text-sm font-medium text-card-foreground"
             >
               Email
             </label>
@@ -94,7 +118,7 @@ export default function SignupPage() {
           <div className="space-y-2">
             <label
               htmlFor="password"
-              className="text-sm font-medium text-stone-700"
+              className="text-sm font-medium text-card-foreground"
             >
               Password
             </label>
@@ -115,7 +139,7 @@ export default function SignupPage() {
           <div className="space-y-2">
             <label
               htmlFor="confirmPassword"
-              className="text-sm font-medium text-stone-700"
+              className="text-sm font-medium text-card-foreground"
             >
               Confirm password
             </label>
@@ -133,20 +157,94 @@ export default function SignupPage() {
             )}
           </div>
 
+          {/* Legal content scroll container */}
+          <div className="space-y-2">
+            <span className="text-sm font-medium text-card-foreground">
+              Terms &amp; Privacy Policy
+            </span>
+            <div
+              ref={scrollRef}
+              onScroll={handleScroll}
+              className="max-h-[200px] overflow-y-auto rounded-lg border border-border bg-muted p-4 text-xs leading-relaxed text-muted-foreground scroll-smooth"
+            >
+              <TermsContent />
+              <div className="my-4 border-t border-border" />
+              <PrivacyContent />
+            </div>
+            {!hasScrolledToBottom && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <svg
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 5v14M19 12l-7 7-7-7" />
+                </svg>
+                Scroll to the bottom to continue
+              </p>
+            )}
+            <div className="flex items-start gap-2 mt-1">
+              <input
+                id="acceptTerms"
+                type="checkbox"
+                disabled={!hasScrolledToBottom}
+                onChange={(e) =>
+                  setValue("acceptTerms", e.target.checked as true, {
+                    shouldValidate: true,
+                  })
+                }
+                className="mt-0.5 h-4 w-4 rounded border-input accent-primary disabled:opacity-40 disabled:cursor-not-allowed"
+              />
+              <label
+                htmlFor="acceptTerms"
+                className={`text-sm select-none ${hasScrolledToBottom ? "text-card-foreground" : "text-muted-foreground"}`}
+              >
+                I agree to the{" "}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="font-medium text-primary hover:text-primary/80 underline"
+                >
+                  Terms &amp; Conditions
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="font-medium text-primary hover:text-primary/80 underline"
+                >
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+            {errors.acceptTerms && (
+              <p className="text-sm text-destructive">
+                {errors.acceptTerms.message}
+              </p>
+            )}
+          </div>
+
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700/90 disabled:opacity-50"
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             {isSubmitting ? "Creating account..." : "Create account"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-stone-500">
+        <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-medium text-indigo-700 hover:text-indigo-600"
+            className="font-medium text-primary hover:text-primary/80"
           >
             Sign in
           </Link>

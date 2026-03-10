@@ -11,6 +11,9 @@ import {
   forgotPasswordSchema,
 } from "@/lib/validators";
 
+const inputClassName =
+  "w-full rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-card-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30";
+
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
 
@@ -34,25 +37,29 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900">
-      <div className="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 dark:from-[#08071a] dark:via-[#100e28] dark:to-[#08071a]">
+      <div className="w-full max-w-sm space-y-6 rounded-2xl bg-card p-8 shadow-2xl">
         <div className="text-center">
           <div className="flex items-center justify-center gap-2">
             <Logo size={28} />
-            <h1 className="text-2xl font-bold text-stone-900">Clockwork</h1>
+            <h1 className="text-2xl font-bold text-card-foreground">
+              Clockwork
+            </h1>
           </div>
-          <p className="text-stone-500 text-sm mt-1">Reset your password</p>
+          <p className="text-muted-foreground text-sm mt-1">
+            Reset your password
+          </p>
         </div>
 
         {sent ? (
           <div className="space-y-4">
-            <div className="bg-emerald-50 text-emerald-800 text-sm p-3 rounded-md">
+            <div className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 text-sm p-3 rounded-md">
               If an account with that email exists, we&apos;ve sent a password
               reset link. Check your inbox.
             </div>
             <Link
               href="/login"
-              className="block text-center text-sm font-medium text-indigo-700 hover:text-indigo-600"
+              className="block text-center text-sm font-medium text-primary hover:text-primary/80"
             >
               Back to login
             </Link>
@@ -68,7 +75,7 @@ export default function ForgotPasswordPage() {
             <div className="space-y-2">
               <label
                 htmlFor="email"
-                className="text-sm font-medium text-stone-700"
+                className="text-sm font-medium text-card-foreground"
               >
                 Email
               </label>
@@ -77,7 +84,7 @@ export default function ForgotPasswordPage() {
                 type="email"
                 autoComplete="email"
                 {...register("email")}
-                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 shadow-sm outline-none transition-colors placeholder:text-stone-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                className={inputClassName}
               />
               {errors.email && (
                 <p className="text-sm text-destructive">
@@ -89,15 +96,15 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700/90 disabled:opacity-50"
+              className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
             >
               {isSubmitting ? "Sending..." : "Send reset link"}
             </button>
 
-            <p className="text-center text-sm text-stone-500">
+            <p className="text-center text-sm text-muted-foreground">
               <Link
                 href="/login"
-                className="font-medium text-indigo-700 hover:text-indigo-600"
+                className="font-medium text-primary hover:text-primary/80"
               >
                 Back to login
               </Link>

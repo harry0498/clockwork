@@ -35,6 +35,7 @@ export const users = pgTable("users", {
   twoFactorMethod: varchar("two_factor_method", { length: 10 }),
   totpSecret: text("totp_secret"),
   backupCodes: text("backup_codes"),
+  termsAcceptedAt: timestamp("terms_accepted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

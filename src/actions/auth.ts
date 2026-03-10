@@ -38,6 +38,7 @@ export async function signup(
       name: parsed.data.name,
       email: parsed.data.email,
       passwordHash,
+      termsAcceptedAt: new Date(),
     });
   } catch {
     // Silently ignore duplicate email to prevent enumeration

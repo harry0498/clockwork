@@ -59,6 +59,7 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             email: user.email,
             name: user.name,
+            termsAcceptedAt: user.termsAcceptedAt?.toISOString() ?? null,
           };
         }
 
@@ -123,6 +124,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
+          termsAcceptedAt: user.termsAcceptedAt?.toISOString() ?? null,
         };
       },
     }),
@@ -132,9 +134,20 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
+        const termsVal = (user as { termsAcceptedAt?: string | null })
+          .termsAcceptedAt;
+        token.termsAcceptedAt = termsVal ?? null;
+      }
+      // Allow updating the token when terms are accepted
+      if (trigger === "update") {
+        const dbUser = await db.query.users.findFirst({
+          where: eq(users.id, token.id as string),
+          columns: { termsAcceptedAt: true },
+        });
+        token.termsAcceptedAt = dbUser?.termsAcceptedAt?.toISOString() ?? null;
       }
       return token;
     },
