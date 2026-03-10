@@ -75,8 +75,10 @@ export async function getDashboardStats() {
     Number(billedStats.billedMinutes) + Number(manualStats.manualMinutes);
   const billedAmount =
     Number(billedStats.billedAmount) + Number(manualStats.manualAmount);
-  const paidMinutes = Number(paidStats.paidMinutes);
-  const paidAmount = Number(paidStats.paidAmount);
+  const paidMinutes =
+    Number(paidStats.paidMinutes) + Number(manualStats.manualMinutes);
+  const paidAmount =
+    Number(paidStats.paidAmount) + Number(manualStats.manualAmount);
 
   return {
     totalMinutes,
