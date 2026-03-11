@@ -51,7 +51,7 @@ export default async function InvoicesPage({
       pagination={{ currentPage: result.page, pageCount: result.pageCount }}
       sorting={{ sort, dir }}
     >
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="grid grid-cols-1 gap-3 rounded-xl border border-border/60 bg-card/50 p-4 shadow-sm sm:grid-cols-2 lg:flex lg:flex-row lg:items-end lg:gap-4">
         <TaxYearFilter basePath="/invoices" />
         <ClientFilterClient
           clients={clients}

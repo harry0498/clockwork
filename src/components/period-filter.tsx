@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { FilterSelect } from "@/components/filter-select";
 import { getPeriodBounds, type PeriodType, shiftPeriod } from "@/lib/tax-year";
 
-const periodLabels: Record<PeriodType, string> = {
-  month: "Month",
-  week: "Week",
-  taxYear: "Tax Year",
-};
+const periodOptions = [
+  { value: "month", label: "Month" },
+  { value: "week", label: "Week" },
+  { value: "taxYear", label: "Tax Year" },
+] as const;
 
 const periodTypes: PeriodType[] = ["month", "week", "taxYear"];
 
@@ -32,13 +33,8 @@ export function PeriodFilter({ basePath }: { basePath: string }) {
       params.delete("ref");
     }
     params.delete("page");
-    // Clean up legacy taxYear param
     params.delete("taxYear");
     router.push(`${basePath}?${params.toString()}`);
-  }
-
-  function handlePeriodChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    navigate(e.target.value as PeriodType);
   }
 
   function handleShift(direction: 1 | -1) {
@@ -47,38 +43,64 @@ export function PeriodFilter({ basePath }: { basePath: string }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <select
+    <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-end sm:gap-4 lg:col-span-1">
+      <FilterSelect
+        label="View by"
         value={period}
-        onChange={handlePeriodChange}
-        className="filter-select rounded-lg border border-input bg-background py-2.5 pl-3 pr-8 text-sm shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
-      >
-        {periodTypes.map((p) => (
-          <option key={p} value={p}>
-            {periodLabels[p]}
-          </option>
-        ))}
-      </select>
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          onClick={() => handleShift(-1)}
-          className="inline-flex h-10 w-8 items-center justify-center rounded-lg border border-input bg-background text-sm transition-colors hover:bg-accent"
-          aria-label="Previous period"
-        >
-          ‹
-        </button>
-        <span className="min-w-[8rem] text-center text-sm font-medium">
-          {bounds.label}
+        onChange={(v) => navigate(v as PeriodType)}
+        options={[...periodOptions]}
+      />
+      <div className="flex-1 sm:flex-initial">
+        <span className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Period
         </span>
-        <button
-          type="button"
-          onClick={() => handleShift(1)}
-          className="inline-flex h-10 w-8 items-center justify-center rounded-lg border border-input bg-background text-sm transition-colors hover:bg-accent"
-          aria-label="Next period"
-        >
-          ›
-        </button>
+        <div className="flex h-9 items-center rounded-lg border border-border bg-card shadow-sm">
+          <button
+            type="button"
+            onClick={() => handleShift(-1)}
+            className="inline-flex h-full w-8 items-center justify-center rounded-l-lg transition-colors hover:bg-accent"
+            aria-label="Previous period"
+          >
+            <svg
+              aria-hidden="true"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+          <div className="h-full w-px bg-border" />
+          <span className="min-w-[9rem] flex-1 px-3 text-center text-sm font-medium sm:flex-initial">
+            {bounds.label}
+          </span>
+          <div className="h-full w-px bg-border" />
+          <button
+            type="button"
+            onClick={() => handleShift(1)}
+            className="inline-flex h-full w-8 items-center justify-center rounded-r-lg transition-colors hover:bg-accent"
+            aria-label="Next period"
+          >
+            <svg
+              aria-hidden="true"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );

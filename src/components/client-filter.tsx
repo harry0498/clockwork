@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { FilterSelect } from "@/components/filter-select";
 
 export function ClientFilterClient({
   clients,
@@ -14,10 +15,10 @@ export function ClientFilterClient({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  function handleChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
-    if (e.target.value) {
-      params.set("clientId", e.target.value);
+    if (value) {
+      params.set("clientId", value);
     } else {
       params.delete("clientId");
     }
@@ -26,17 +27,15 @@ export function ClientFilterClient({
   }
 
   return (
-    <select
+    <FilterSelect
+      label="Client"
       value={currentClientId ?? ""}
       onChange={handleChange}
-      className="filter-select rounded-lg border border-input bg-background py-2.5 pl-3 pr-8 text-sm shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
-    >
-      <option value="">All clients</option>
-      {clients.map((c) => (
-        <option key={c.id} value={c.id}>
-          {c.name}
-        </option>
-      ))}
-    </select>
+      isFiltered={!!currentClientId}
+      options={[
+        { value: "", label: "All clients" },
+        ...clients.map((c) => ({ value: c.id, label: c.name })),
+      ]}
+    />
   );
 }

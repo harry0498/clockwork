@@ -36,7 +36,9 @@ export default async function ClientsPage({
       pagination={{ currentPage: result.page, pageCount: result.pageCount }}
       sorting={{ sort, dir }}
     >
-      <SearchFilter placeholder="Search clients..." />
+      <div className="rounded-xl border border-border/60 bg-card/50 p-4 shadow-sm">
+        <SearchFilter placeholder="Search clients..." />
+      </div>
     </ClientsPageClient>
   );
 }

@@ -25,15 +25,32 @@ export function SortableHeader({
   params.set("dir", nextDir);
   params.delete("page");
 
-  const arrow = isActive ? (currentDir === "asc" ? " \u2191" : " \u2193") : "";
-
   return (
     <Link
       href={`${pathname}?${params.toString()}`}
-      className="inline-flex items-center gap-1 hover:text-foreground"
+      className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
     >
       {label}
-      {arrow && <span className="text-xs text-foreground">{arrow}</span>}
+      {isActive && (
+        <svg
+          aria-hidden="true"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-foreground"
+        >
+          {currentDir === "asc" ? (
+            <path d="m18 15-6-6-6 6" />
+          ) : (
+            <path d="m6 9 6 6 6-6" />
+          )}
+        </svg>
+      )}
     </Link>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { FilterSelect } from "@/components/filter-select";
 
 const options = [
   { value: "uninvoiced", label: "Not invoiced" },
@@ -13,28 +14,24 @@ export function InvoicedFilter({ basePath }: { basePath: string }) {
   const searchParams = useSearchParams();
   const current = searchParams.get("invoiced") ?? "uninvoiced";
 
-  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  function handleChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
-    if (e.target.value === "uninvoiced") {
+    if (value === "uninvoiced") {
       params.delete("invoiced");
     } else {
-      params.set("invoiced", e.target.value);
+      params.set("invoiced", value);
     }
     params.delete("page");
     router.push(`${basePath}?${params.toString()}`);
   }
 
   return (
-    <select
+    <FilterSelect
+      label="Invoice Status"
       value={current}
       onChange={handleChange}
-      className="filter-select rounded-lg border border-input bg-background py-2.5 pl-3 pr-8 text-sm shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
+      isFiltered={current !== "uninvoiced"}
+      options={[...options]}
+    />
   );
 }

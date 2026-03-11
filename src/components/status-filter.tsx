@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { FilterSelect } from "@/components/filter-select";
 
 const statuses = [
   { value: "", label: "All statuses" },
@@ -14,10 +15,10 @@ export function StatusFilter({ basePath }: { basePath: string }) {
   const searchParams = useSearchParams();
   const currentStatus = searchParams.get("status") ?? "";
 
-  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  function handleChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
-    if (e.target.value) {
-      params.set("status", e.target.value);
+    if (value) {
+      params.set("status", value);
     } else {
       params.delete("status");
     }
@@ -26,16 +27,12 @@ export function StatusFilter({ basePath }: { basePath: string }) {
   }
 
   return (
-    <select
+    <FilterSelect
+      label="Status"
       value={currentStatus}
       onChange={handleChange}
-      className="filter-select rounded-lg border border-input bg-background py-2.5 pl-3 pr-8 text-sm shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
-    >
-      {statuses.map((s) => (
-        <option key={s.value} value={s.value}>
-          {s.label}
-        </option>
-      ))}
-    </select>
+      isFiltered={!!currentStatus}
+      options={[...statuses]}
+    />
   );
 }
