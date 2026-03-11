@@ -36,7 +36,7 @@ export function EntryForm({
   } = useForm<EntryInput>({
     resolver: zodResolver(entrySchema),
     defaultValues: {
-      clientId: entry?.clientId ?? "",
+      clientId: entry?.clientId ?? (clients.length === 1 ? clients[0].id : ""),
       title: entry?.title ?? "",
       notes: entry?.notes ?? "",
       minutes: entry?.minutes ?? NaN,
