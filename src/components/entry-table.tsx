@@ -37,12 +37,14 @@ export function EntryTable({
   onDelete,
   onNew,
   pagination,
+  sorting,
 }: {
   entries: Entry[];
   onEdit?: (entry: Entry) => void;
   onDelete?: (entry: Entry) => void;
   onNew?: () => void;
   pagination?: { currentPage: number; pageCount: number };
+  sorting?: { sort: string; dir: "asc" | "desc" };
 }) {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -122,7 +124,7 @@ export function EntryTable({
   }
 
   const columns: Column<Entry>[] = [
-    { header: "Date", accessor: "date" },
+    { header: "Date", accessor: "date", sortKey: "date" },
     {
       header: "Client",
       accessor: (e) => (
@@ -131,7 +133,12 @@ export function EntryTable({
         </Link>
       ),
     },
-    { header: "Title", accessor: "title", className: "font-medium" },
+    {
+      header: "Title",
+      accessor: "title",
+      className: "font-medium",
+      sortKey: "title",
+    },
     {
       header: "Time",
       accessor: (e) => formatMinutes(e.minutes),
@@ -149,6 +156,7 @@ export function EntryTable({
       align: "right",
       className: "font-medium",
       hideOnMobile: true,
+      sortKey: "amount",
     },
     {
       header: "Invoiced",
@@ -206,6 +214,7 @@ export function EntryTable({
         data={entries}
         keyExtractor={(e) => e.id}
         pagination={pagination}
+        sorting={sorting ? { sort: sorting.sort, dir: sorting.dir } : undefined}
         selection={{
           selectedKeys: selectedIds,
           onToggle: handleToggle,

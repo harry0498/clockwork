@@ -1,6 +1,6 @@
 "use server";
 
-import { and, desc, eq, gte, like, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, like, lte, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { invoices, timeEntries } from "@/db/schema";
@@ -110,25 +110,60 @@ export async function getInvoices(taxYear?: number) {
 
 export async function getInvoicesPaginated(
   taxYear: number | undefined,
-  options: { page: number; offset: number; limit?: number },
+  options: {
+    page: number;
+    offset: number;
+    limit?: number;
+    clientId?: string;
+    status?: string;
+    sortBy?: "number" | "date" | "total";
+    sortDir?: "asc" | "desc";
+  },
 ): Promise<PaginatedResult<InvoiceWithClient>> {
   const session = await requireSession();
   const year = taxYear ?? getCurrentTaxYearStart();
   const bounds = getTaxYearBounds(year);
 
-  const whereClause = and(
+  const conditions = [
     eq(invoices.userId, session.user.id),
     gte(invoices.issuedAt, bounds.start),
     lte(invoices.issuedAt, bounds.end),
-  );
+  ];
 
+  if (options.clientId) {
+    conditions.push(eq(invoices.clientId, options.clientId));
+  }
+
+  if (options.status && ["draft", "sent", "paid"].includes(options.status)) {
+    conditions.push(
+      eq(invoices.status, options.status as "draft" | "sent" | "paid"),
+    );
+  }
+
+  const sortFn = options.sortDir === "asc" ? asc : desc;
+  let orderCol: Parameters<typeof asc>[0];
+  switch (options.sortBy) {
+    case "number":
+      orderCol = invoices.invoiceNumber;
+      break;
+    case "date":
+      orderCol = invoices.issuedAt;
+      break;
+    case "total":
+      orderCol = invoices.totalAmount;
+      break;
+    default:
+      orderCol = invoices.createdAt;
+  }
+
+  const whereClause = and(...conditions);
   const limit = options.limit ?? PAGE_SIZE;
 
   const [data, [{ count }]] = await Promise.all([
     db.query.invoices.findMany({
       where: whereClause,
       with: { client: true },
-      orderBy: [desc(invoices.createdAt)],
+      orderBy: [sortFn(orderCol)],
       limit,
       offset: options.offset,
     }),

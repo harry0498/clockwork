@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { clients, invoices, timeEntries } from "@/db/schema";
@@ -56,9 +56,34 @@ export async function getClientsWithStatsPaginated(options: {
   page: number;
   offset: number;
   limit?: number;
+  search?: string;
+  sortBy?: "name" | "totalEarned" | "unbilled";
+  sortDir?: "asc" | "desc";
 }): Promise<PaginatedResult<ClientWithStats>> {
   const session = await requireSession();
   const limit = options.limit ?? PAGE_SIZE;
+
+  const conditions = [eq(clients.userId, session.user.id)];
+  if (options.search) {
+    conditions.push(ilike(clients.name, `%${options.search}%`));
+  }
+  const whereClause = and(...conditions);
+
+  const totalEarnedExpr = sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`;
+  const unbilledExpr = sql<number>`coalesce(sum(case when (${timeEntries.invoiceId} is null or ${invoices.status} = 'draft') and ${timeEntries.manuallyInvoiced} = false then ${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0 else 0 end), 0)`;
+
+  const sortFn = options.sortDir === "desc" ? desc : asc;
+  let orderExpr: Parameters<typeof asc>[0];
+  switch (options.sortBy) {
+    case "totalEarned":
+      orderExpr = totalEarnedExpr;
+      break;
+    case "unbilled":
+      orderExpr = unbilledExpr;
+      break;
+    default:
+      orderExpr = clients.name;
+  }
 
   const [rows, [{ count }]] = await Promise.all([
     db
@@ -67,21 +92,21 @@ export async function getClientsWithStatsPaginated(options: {
         name: clients.name,
         email: clients.email,
         totalMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
-        totalEarned: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
-        unbilledAmount: sql<number>`coalesce(sum(case when (${timeEntries.invoiceId} is null or ${invoices.status} = 'draft') and ${timeEntries.manuallyInvoiced} = false then ${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0 else 0 end), 0)`,
+        totalEarned: totalEarnedExpr,
+        unbilledAmount: unbilledExpr,
       })
       .from(clients)
       .leftJoin(timeEntries, eq(clients.id, timeEntries.clientId))
       .leftJoin(invoices, eq(timeEntries.invoiceId, invoices.id))
-      .where(eq(clients.userId, session.user.id))
+      .where(whereClause)
       .groupBy(clients.id, clients.name, clients.email)
-      .orderBy(clients.name)
+      .orderBy(sortFn(orderExpr))
       .limit(limit)
       .offset(options.offset),
     db
       .select({ count: sql<number>`count(*)` })
       .from(clients)
-      .where(eq(clients.userId, session.user.id)),
+      .where(whereClause),
   ]);
 
   const total = Number(count);

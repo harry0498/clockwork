@@ -50,6 +50,13 @@
       "when": 1773124146401,
       "tag": "0006_equal_luke_cage",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1773136653620,
+      "tag": "0007_fuzzy_sentry",
+      "breakpoints": true
     }
   ]
 }

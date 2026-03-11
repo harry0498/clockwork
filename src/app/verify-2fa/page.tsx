@@ -7,6 +7,9 @@ import { Suspense, useRef, useState } from "react";
 import { verifyTwoFactor } from "@/actions/auth";
 import { Logo } from "@/components/logo";
 
+const inputClassName =
+  "w-full rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-card-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30";
+
 function VerifyForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -28,7 +31,7 @@ function VerifyForm() {
         </div>
         <Link
           href="/login"
-          className="block text-center text-sm font-medium text-indigo-700 hover:text-indigo-600"
+          className="block text-center text-sm font-medium text-primary hover:text-primary/80"
         >
           Back to login
         </Link>
@@ -80,7 +83,7 @@ function VerifyForm() {
         </div>
       )}
 
-      <p className="text-sm text-stone-600">
+      <p className="text-sm text-muted-foreground">
         {useBackup
           ? "Enter one of your backup codes."
           : method === "email"
@@ -89,7 +92,10 @@ function VerifyForm() {
       </p>
 
       <div className="space-y-2">
-        <label htmlFor="code" className="text-sm font-medium text-stone-700">
+        <label
+          htmlFor="code"
+          className="text-sm font-medium text-card-foreground"
+        >
           {useBackup ? "Backup code" : "Verification code"}
         </label>
         <input
@@ -101,7 +107,7 @@ function VerifyForm() {
           maxLength={useBackup ? 8 : 6}
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 shadow-sm outline-none transition-colors placeholder:text-stone-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 text-center tracking-[0.3em] font-mono"
+          className={`${inputClassName} text-center tracking-[0.3em] font-mono`}
           placeholder={useBackup ? "xxxxxxxx" : "000000"}
         />
       </div>
@@ -109,7 +115,7 @@ function VerifyForm() {
       <button
         type="submit"
         disabled={loading || !code.trim()}
-        className="w-full rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700/90 disabled:opacity-50"
+        className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
       >
         {loading ? "Verifying..." : "Verify"}
       </button>
@@ -122,11 +128,14 @@ function VerifyForm() {
             setCode("");
             setError("");
           }}
-          className="text-indigo-700 hover:text-indigo-600 font-medium"
+          className="text-primary hover:text-primary/80 font-medium"
         >
           {useBackup ? "Use verification code" : "Use backup code"}
         </button>
-        <Link href="/login" className="text-stone-500 hover:text-stone-700">
+        <Link
+          href="/login"
+          className="text-muted-foreground hover:text-card-foreground"
+        >
           Cancel
         </Link>
       </div>
@@ -136,14 +145,16 @@ function VerifyForm() {
 
 export default function VerifyTwoFactorPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900">
-      <div className="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 dark:from-[#08071a] dark:via-[#100e28] dark:to-[#08071a]">
+      <div className="w-full max-w-sm space-y-6 rounded-2xl bg-card p-8 shadow-2xl">
         <div className="text-center">
           <div className="flex items-center justify-center gap-2">
             <Logo size={28} />
-            <h1 className="text-2xl font-bold text-stone-900">Clockwork</h1>
+            <h1 className="text-2xl font-bold text-card-foreground">
+              Clockwork
+            </h1>
           </div>
-          <p className="text-stone-500 text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             Two-factor authentication
           </p>
         </div>

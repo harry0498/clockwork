@@ -3,24 +3,24 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { FilterSelect } from "@/components/filter-select";
 
-export function ClientFilterClient({
-  clients,
-  basePath,
-  currentClientId,
-}: {
-  clients: Array<{ id: string; name: string }>;
-  basePath: string;
-  currentClientId?: string;
-}) {
+const statuses = [
+  { value: "", label: "All statuses" },
+  { value: "draft", label: "Draft" },
+  { value: "sent", label: "Sent" },
+  { value: "paid", label: "Paid" },
+] as const;
+
+export function StatusFilter({ basePath }: { basePath: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const currentStatus = searchParams.get("status") ?? "";
 
   function handleChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
-      params.set("clientId", value);
+      params.set("status", value);
     } else {
-      params.delete("clientId");
+      params.delete("status");
     }
     params.delete("page");
     router.push(`${basePath}?${params.toString()}`);
@@ -28,14 +28,11 @@ export function ClientFilterClient({
 
   return (
     <FilterSelect
-      label="Client"
-      value={currentClientId ?? ""}
+      label="Status"
+      value={currentStatus}
       onChange={handleChange}
-      isFiltered={!!currentClientId}
-      options={[
-        { value: "", label: "All clients" },
-        ...clients.map((c) => ({ value: c.id, label: c.name })),
-      ]}
+      isFiltered={!!currentStatus}
+      options={[...statuses]}
     />
   );
 }

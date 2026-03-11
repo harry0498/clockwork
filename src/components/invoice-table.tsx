@@ -32,14 +32,17 @@ export function InvoiceTable({
   invoices,
   onDelete,
   pagination,
+  sorting,
 }: {
   invoices: InvoiceWithClient[];
   onDelete?: (invoice: InvoiceWithClient) => void;
   pagination?: { currentPage: number; pageCount: number };
+  sorting?: { sort: string; dir: "asc" | "desc" };
 }) {
   const columns: Column<InvoiceWithClient>[] = [
     {
       header: "Number",
+      sortKey: "number",
       accessor: (inv) => (
         <Link
           href={`/invoices/${inv.id}`}
@@ -57,12 +60,18 @@ export function InvoiceTable({
         </Link>
       ),
     },
-    { header: "Date", accessor: "issuedAt", hideOnMobile: true },
+    {
+      header: "Date",
+      accessor: "issuedAt",
+      hideOnMobile: true,
+      sortKey: "date",
+    },
     {
       header: "Total",
       accessor: (inv) => formatGBP(inv.totalAmount),
       align: "right",
       className: "font-medium",
+      sortKey: "total",
     },
     {
       header: "Status",
@@ -83,6 +92,7 @@ export function InvoiceTable({
       data={invoices}
       keyExtractor={(inv) => inv.id}
       pagination={pagination}
+      sorting={sorting ? { sort: sorting.sort, dir: sorting.dir } : undefined}
       actions={(inv) => (
         <ActionMenu
           items={[

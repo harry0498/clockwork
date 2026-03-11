@@ -7,8 +7,10 @@ import {
   eq,
   gte,
   inArray,
+  isNotNull,
   isNull,
   lte,
+  or,
   sql,
 } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -70,8 +72,10 @@ export async function getEntries(options?: {
 }
 
 export async function getEntriesPaginated(options: {
-  taxYear?: number;
+  dateStart: string;
+  dateEnd: string;
   clientId?: string;
+  invoicedStatus?: "all" | "uninvoiced" | "invoiced";
   page: number;
   offset: number;
   limit?: number;
@@ -79,17 +83,26 @@ export async function getEntriesPaginated(options: {
   sortDir?: "asc" | "desc";
 }): Promise<PaginatedResult<TimeEntryWithClient>> {
   const session = await requireSession();
-  const taxYear = options.taxYear ?? getCurrentTaxYearStart();
-  const bounds = getTaxYearBounds(taxYear);
 
   const conditions = [
     eq(timeEntries.userId, session.user.id),
-    gte(timeEntries.date, bounds.start),
-    lte(timeEntries.date, bounds.end),
+    gte(timeEntries.date, options.dateStart),
+    lte(timeEntries.date, options.dateEnd),
   ];
 
   if (options.clientId) {
     conditions.push(eq(timeEntries.clientId, options.clientId));
+  }
+
+  if (options.invoicedStatus === "uninvoiced") {
+    conditions.push(isNull(timeEntries.invoiceId));
+    conditions.push(eq(timeEntries.manuallyInvoiced, false));
+  } else if (options.invoicedStatus === "invoiced") {
+    const invoicedCondition = or(
+      isNotNull(timeEntries.invoiceId),
+      eq(timeEntries.manuallyInvoiced, true),
+    );
+    if (invoicedCondition) conditions.push(invoicedCondition);
   }
 
   const sortFn = options.sortDir === "asc" ? asc : desc;

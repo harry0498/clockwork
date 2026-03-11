@@ -22,12 +22,14 @@ export function InvoicesPageClient({
   getEntriesForClient,
   children,
   pagination,
+  sorting,
 }: {
   invoices: InvoiceWithClient[];
   clients: ClientPick[];
   getEntriesForClient: (clientId: string) => Promise<InvoiceEntry[]>;
   children?: React.ReactNode;
   pagination?: { currentPage: number; pageCount: number };
+  sorting?: { sort: string; dir: "asc" | "desc" };
 }) {
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
@@ -69,6 +71,7 @@ export function InvoicesPageClient({
           invoices={invoices}
           onDelete={setDeleteTarget}
           pagination={pagination}
+          sorting={sorting}
         />
       )}
 

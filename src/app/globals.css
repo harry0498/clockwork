@@ -36,6 +36,13 @@ input:-webkit-autofill:focus {
   transition: background-color 5000s ease-in-out 0s;
 }
 
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #eeeef5;
+  -webkit-box-shadow: 0 0 0px 1000px #100e22 inset;
+}
+
 @layer base {
   .dark {
     --color-background: #0b0a1a;

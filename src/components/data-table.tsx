@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { IndeterminateCheckbox } from "@/components/indeterminate-checkbox";
 import { Pagination } from "@/components/pagination";
+import { SortableHeader } from "@/components/sortable-header";
 
 const alignClass = {
   left: "text-left",
@@ -15,6 +16,7 @@ export interface Column<T> {
   align?: "left" | "right" | "center";
   className?: string;
   hideOnMobile?: boolean;
+  sortKey?: string;
 }
 
 interface SelectionProps {
@@ -34,6 +36,7 @@ interface DataTableProps<T> {
   actions?: (row: T) => ReactNode;
   pagination?: { currentPage: number; pageCount: number };
   selection?: SelectionProps;
+  sorting?: { sort: string | null; dir: "asc" | "desc" | null };
 }
 
 function colKey<T>(col: Column<T>, index: number): string {
@@ -50,6 +53,7 @@ export function DataTable<T>({
   actions,
   pagination,
   selection,
+  sorting,
 }: DataTableProps<T>) {
   const allColumns: Column<T>[] = actions
     ? [
@@ -80,7 +84,16 @@ export function DataTable<T>({
                   key={colKey(col, i)}
                   className={`px-4 py-3 text-xs uppercase tracking-wide ${alignClass[col.align ?? "left"]} ${col.className ?? ""} ${col.hideOnMobile ? "hidden md:table-cell" : ""}`}
                 >
-                  {col.header}
+                  {sorting && col.sortKey && typeof col.header === "string" ? (
+                    <SortableHeader
+                      label={col.header}
+                      sortKey={col.sortKey}
+                      currentSort={sorting.sort}
+                      currentDir={sorting.dir}
+                    />
+                  ) : (
+                    col.header
+                  )}
                 </th>
               ))}
             </tr>

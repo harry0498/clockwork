@@ -19,15 +19,18 @@ export function ClientTable({
   onEdit,
   onDelete,
   pagination,
+  sorting,
 }: {
   clients: ClientWithStats[];
   onEdit?: (client: ClientWithStats) => void;
   onDelete?: (client: ClientWithStats) => void;
   pagination?: { currentPage: number; pageCount: number };
+  sorting?: { sort: string; dir: "asc" | "desc" };
 }) {
   const columns: Column<ClientWithStats>[] = [
     {
       header: "Name",
+      sortKey: "name",
       accessor: (e) => (
         <Link href={`/clients/${e.id}`} className="hover:underline">
           {e.name}
@@ -49,11 +52,13 @@ export function ClientTable({
     },
     {
       header: "Total Earned",
+      sortKey: "totalEarned",
       accessor: (c) => formatGBP(c.totalEarned),
       align: "right",
     },
     {
       header: "Unbilled",
+      sortKey: "unbilled",
       accessor: (c) => formatGBP(c.unbilledAmount),
       align: "right",
       hideOnMobile: true,
@@ -66,6 +71,7 @@ export function ClientTable({
       data={clients}
       keyExtractor={(c) => c.id}
       pagination={pagination}
+      sorting={sorting ? { sort: sorting.sort, dir: sorting.dir } : undefined}
       actions={(c) => (
         <ActionMenu
           items={[
