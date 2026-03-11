@@ -66,7 +66,7 @@ export async function getEntries(options?: {
   return db.query.timeEntries.findMany({
     where: and(...conditions),
     with: { client: true },
-    orderBy: [sortFn(orderCol)],
+    orderBy: [sortFn(orderCol), desc(timeEntries.createdAt)],
     limit: options?.limit,
   });
 }
@@ -125,7 +125,7 @@ export async function getEntriesPaginated(options: {
     db.query.timeEntries.findMany({
       where: whereClause,
       with: { client: true },
-      orderBy: [sortFn(orderCol)],
+      orderBy: [sortFn(orderCol), desc(timeEntries.createdAt)],
       limit,
       offset: options.offset,
     }),
