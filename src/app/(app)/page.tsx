@@ -91,12 +91,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {clients.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Quick Log</h2>
-          <QuickLog clients={clients} />
-        </div>
-      )}
+      {clients.length > 0 && <QuickLog clients={clients} />}
 
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Recent Entries</h2>
