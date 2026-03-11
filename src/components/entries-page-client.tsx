@@ -29,11 +29,13 @@ export function EntriesPageClient({
   clients,
   children,
   pagination,
+  sorting,
 }: {
   entries: Entry[];
   clients: ClientPick[];
   children?: React.ReactNode;
   pagination?: { currentPage: number; pageCount: number };
+  sorting?: { sort: string; dir: "asc" | "desc" };
 }) {
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
@@ -73,6 +75,7 @@ export function EntriesPageClient({
         }
         onDelete={setDeleteTarget}
         pagination={pagination}
+        sorting={sorting}
       />
 
       <EntryDialog

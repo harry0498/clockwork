@@ -22,9 +22,13 @@ interface ClientWithStats {
 export function ClientsPageClient({
   clients,
   pagination,
+  sorting,
+  children,
 }: {
   clients: ClientWithStats[];
   pagination?: { currentPage: number; pageCount: number };
+  sorting?: { sort: string; dir: "asc" | "desc" };
+  children?: React.ReactNode;
 }) {
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
@@ -64,6 +68,8 @@ export function ClientsPageClient({
         </button>
       </div>
 
+      {children}
+
       {clients.length === 0 ? (
         <EmptyState
           message="No clients yet. Add your first client to get started."
@@ -76,6 +82,7 @@ export function ClientsPageClient({
           onEdit={handleEdit}
           onDelete={setDeleteTarget}
           pagination={pagination}
+          sorting={sorting}
         />
       )}
 

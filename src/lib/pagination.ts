@@ -1,5 +1,19 @@
 export const PAGE_SIZE = 25;
 
+export function parseSort<T extends string>(
+  params: { sort?: string; dir?: string },
+  allowed: readonly T[],
+  defaultSort: T,
+  defaultDir: "asc" | "desc" = "desc",
+): { sort: T; dir: "asc" | "desc" } {
+  const sort = allowed.includes(params.sort as T)
+    ? (params.sort as T)
+    : defaultSort;
+  const dir =
+    params.dir === "asc" || params.dir === "desc" ? params.dir : defaultDir;
+  return { sort, dir };
+}
+
 export interface PaginatedResult<T> {
   data: T[];
   total: number;

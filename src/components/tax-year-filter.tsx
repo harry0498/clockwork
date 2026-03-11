@@ -20,7 +20,7 @@ export function TaxYearFilter({ basePath }: { basePath: string }) {
     <select
       value={currentYear ?? years[0]?.value.toString()}
       onChange={handleChange}
-      className="rounded-lg border border-input bg-background px-3 py-2.5 text-sm shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
+      className="filter-select rounded-lg border border-input bg-background py-2.5 pl-3 pr-8 text-sm shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
     >
       {years.map((y) => (
         <option key={y.value} value={y.value}>
