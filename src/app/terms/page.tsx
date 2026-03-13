@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { TermsContent } from "@/components/terms-content";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
+  description:
+    "Read Clockwork's terms and conditions for using our time tracking and invoicing platform.",
+  alternates: { canonical: "/terms" },
+};
 
 export default function TermsPage() {
   return (
