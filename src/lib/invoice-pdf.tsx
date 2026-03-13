@@ -8,7 +8,7 @@ import {
   parseTemplate,
   resolveFooterPlaceholders,
 } from "@/lib/invoice-template";
-import type { Client, Invoice, TimeEntry, User } from "@/lib/types";
+import type { Client, Invoice, TimeEntry, UserProfile } from "@/lib/types";
 
 const sampleEntries: TimeEntry[] = [
   {
@@ -98,7 +98,7 @@ interface InvoicePdfProps {
   invoice: Invoice;
   client: Client;
   entries: TimeEntry[];
-  user: User;
+  user: UserProfile;
 }
 
 export function InvoicePdf({
@@ -444,11 +444,9 @@ export function InvoicePdfPreviewDoc({ config, profile }: PreviewDocProps) {
     createdAt: new Date(),
   };
 
-  const user: User = {
-    id: "preview",
+  const user: UserProfile = {
     email: profile.email,
     name: profile.name,
-    passwordHash: "",
     addressLine1: profile.addressLine1,
     addressLine2: profile.addressLine2,
     county: profile.county,
@@ -458,11 +456,6 @@ export function InvoicePdfPreviewDoc({ config, profile }: PreviewDocProps) {
     accountNumber: profile.accountNumber,
     sortCode: profile.sortCode,
     invoiceTemplate: JSON.stringify(config),
-    twoFactorMethod: null,
-    totpSecret: null,
-    backupCodes: null,
-    termsAcceptedAt: null,
-    createdAt: new Date(),
   };
 
   return (

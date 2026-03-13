@@ -65,7 +65,8 @@ export async function getClientsWithStatsPaginated(options: {
 
   const conditions = [eq(clients.userId, session.user.id)];
   if (options.search) {
-    conditions.push(ilike(clients.name, `%${options.search}%`));
+    const escapedSearch = options.search.replace(/[%_\\]/g, "\\$&");
+    conditions.push(ilike(clients.name, `%${escapedSearch}%`));
   }
   const whereClause = and(...conditions);
 

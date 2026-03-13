@@ -83,7 +83,12 @@ export async function createInvoice(data: {
       await tx
         .update(timeEntries)
         .set({ invoiceId: invoice.id })
-        .where(eq(timeEntries.id, entryId));
+        .where(
+          and(
+            eq(timeEntries.id, entryId),
+            eq(timeEntries.userId, session.user.id),
+          ),
+        );
     }
   });
 
@@ -197,11 +202,25 @@ export async function deleteInvoice(id: string) {
   const session = await requireSession();
 
   await db.transaction(async (tx) => {
-    // Unlink time entries first
+    // Verify ownership first to prevent IDOR
+    const invoice = await tx.query.invoices.findFirst({
+      where: and(eq(invoices.id, id), eq(invoices.userId, session.user.id)),
+      columns: { id: true },
+    });
+    if (!invoice) {
+      throw new Error("Invoice not found");
+    }
+
+    // Unlink time entries then delete (scoped to userId for defense-in-depth)
     await tx
       .update(timeEntries)
       .set({ invoiceId: null })
-      .where(eq(timeEntries.invoiceId, id));
+      .where(
+        and(
+          eq(timeEntries.invoiceId, id),
+          eq(timeEntries.userId, session.user.id),
+        ),
+      );
 
     await tx
       .delete(invoices)

@@ -51,6 +51,12 @@ export const authOptions: NextAuthOptions = {
 
           const user = await db.query.users.findFirst({
             where: eq(users.id, bypassRecord.userId),
+            columns: {
+              id: true,
+              email: true,
+              name: true,
+              termsAcceptedAt: true,
+            },
           });
 
           if (!user) return null;
@@ -70,6 +76,14 @@ export const authOptions: NextAuthOptions = {
 
         const user = await db.query.users.findFirst({
           where: eq(users.email, credentials.email),
+          columns: {
+            id: true,
+            email: true,
+            name: true,
+            passwordHash: true,
+            twoFactorMethod: true,
+            termsAcceptedAt: true,
+          },
         });
 
         if (!user) {

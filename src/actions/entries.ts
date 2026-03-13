@@ -16,7 +16,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { timeEntries } from "@/db/schema";
+import { clients, timeEntries } from "@/db/schema";
 import { PAGE_SIZE, type PaginatedResult } from "@/lib/pagination";
 import { requireSession } from "@/lib/session";
 import { getCurrentTaxYearStart, getTaxYearBounds } from "@/lib/tax-year";
@@ -155,6 +155,18 @@ export async function createEntry(input: EntryInput) {
   const session = await requireSession();
   const data = entrySchema.parse(input);
 
+  // Verify the client belongs to the authenticated user
+  const client = await db.query.clients.findFirst({
+    where: and(
+      eq(clients.id, data.clientId),
+      eq(clients.userId, session.user.id),
+    ),
+    columns: { id: true },
+  });
+  if (!client) {
+    throw new Error("Client not found");
+  }
+
   await db.insert(timeEntries).values({
     userId: session.user.id,
     clientId: data.clientId,
@@ -172,6 +184,18 @@ export async function createEntry(input: EntryInput) {
 export async function updateEntry(id: string, input: EntryInput) {
   const session = await requireSession();
   const data = entrySchema.parse(input);
+
+  // Verify the client belongs to the authenticated user
+  const client = await db.query.clients.findFirst({
+    where: and(
+      eq(clients.id, data.clientId),
+      eq(clients.userId, session.user.id),
+    ),
+    columns: { id: true },
+  });
+  if (!client) {
+    throw new Error("Client not found");
+  }
 
   await db
     .update(timeEntries)
@@ -248,7 +272,8 @@ export async function toggleManuallyInvoiced(id: string) {
 
 const bulkIdsSchema = z
   .array(z.string().uuid())
-  .min(1, "Select at least one entry");
+  .min(1, "Select at least one entry")
+  .max(500, "Too many entries selected");
 
 export async function bulkMarkInvoiced(ids: string[]) {
   const session = await requireSession();
