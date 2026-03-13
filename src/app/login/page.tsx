@@ -7,6 +7,7 @@ import { signIn } from "next-auth/react";
 import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { Logo } from "@/components/logo";
+import { buttonClassName } from "@/lib/constants";
 import { type LoginInput, loginSchema } from "@/lib/validators";
 
 const TWO_FA_PREFIX = "2FA_REQUIRED:";
@@ -133,7 +134,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className={`w-full ${buttonClassName}`}
         >
           {isSubmitting ? "Signing in..." : "Sign in"}
         </button>

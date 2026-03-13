@@ -2,23 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { createInvoice } from "@/actions/invoices";
 import { type Column, DataTable } from "@/components/data-table";
 import { EmptyState } from "@/components/empty-state";
-import { inputClassName } from "@/lib/constants";
+import { buttonClassName, inputClassName } from "@/lib/constants";
 import {
   calculateAmount,
   formatGBP,
   formatMinutes,
   todayISO,
 } from "@/lib/tax-year";
-import type { ClientPick, TimeEntry } from "@/lib/types";
-
-type InvoiceEntry = Pick<
-  TimeEntry,
-  "id" | "title" | "minutes" | "ratePerHour" | "date"
->;
+import { showErrorToast } from "@/lib/toast-helpers";
+import type { ClientPick, InvoiceEntry } from "@/lib/types";
 
 export function InvoiceBuilder({
   clients,
@@ -90,7 +85,7 @@ export function InvoiceBuilder({
         router.push("/invoices");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      showErrorToast(err);
       setLoading(false);
     }
   }
@@ -137,7 +132,7 @@ export function InvoiceBuilder({
               type="button"
               onClick={handleSubmit}
               disabled={loading || selectedIds.size === 0}
-              className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+              className={buttonClassName}
             >
               {loading ? "Creating..." : "Create Invoice"}
             </button>

@@ -1,21 +1,12 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { FilterSelect } from "@/components/filter-select";
+import { useFilterParam } from "@/lib/hooks/use-filter-param";
 import { getAvailableTaxYears } from "@/lib/tax-year";
 
 export function TaxYearFilter({ basePath }: { basePath: string }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentYear = searchParams.get("taxYear");
+  const [currentYear, handleChange] = useFilterParam("taxYear", basePath);
   const years = getAvailableTaxYears();
-
-  function handleChange(value: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("taxYear", value);
-    params.delete("page");
-    router.push(`${basePath}?${params.toString()}`);
-  }
 
   return (
     <FilterSelect

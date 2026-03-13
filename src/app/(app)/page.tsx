@@ -7,6 +7,7 @@ import { DataTable } from "@/components/data-table";
 import { EmptyState } from "@/components/empty-state";
 import { QuickLog } from "@/components/quick-log";
 import { StatGroup } from "@/components/stat-group";
+import { buttonClassName } from "@/lib/constants";
 import {
   calculateAmount,
   formatGBP,
@@ -214,7 +215,7 @@ function GettingStarted({
                   {isNext && (
                     <Link
                       href={step.href}
-                      className="mt-3 inline-block rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+                      className={`mt-3 inline-block ${buttonClassName}`}
                     >
                       {step.cta}
                     </Link>

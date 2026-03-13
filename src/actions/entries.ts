@@ -23,6 +23,44 @@ import { getCurrentTaxYearStart, getTaxYearBounds } from "@/lib/tax-year";
 import type { TimeEntryWithClient } from "@/lib/types";
 import { type EntryInput, entrySchema } from "@/lib/validators";
 
+function revalidateEntries() {
+  revalidatePath("/entries");
+  revalidatePath("/");
+}
+
+async function verifyClientOwnership(clientId: string, userId: string) {
+  const client = await db.query.clients.findFirst({
+    where: and(eq(clients.id, clientId), eq(clients.userId, userId)),
+    columns: { id: true },
+  });
+  if (!client) {
+    throw new Error("Client not found");
+  }
+}
+
+async function withBulkEntries(
+  ids: string[],
+  fn: (validIds: string[], userId: string) => Promise<void>,
+) {
+  const session = await requireSession();
+  const validIds = bulkIdsSchema.parse(ids);
+  await fn(validIds, session.user.id);
+  revalidateEntries();
+}
+
+function getEntrySortColumn(
+  sortBy?: "date" | "amount" | "title",
+): Parameters<typeof asc>[0] {
+  switch (sortBy) {
+    case "amount":
+      return timeEntries.ratePerHour;
+    case "title":
+      return timeEntries.title;
+    default:
+      return timeEntries.date;
+  }
+}
+
 export async function getEntries(options?: {
   taxYear?: number;
   clientId?: string;
@@ -51,17 +89,7 @@ export async function getEntries(options?: {
   }
 
   const sortFn = options?.sortDir === "asc" ? asc : desc;
-  let orderCol: Parameters<typeof asc>[0];
-  switch (options?.sortBy) {
-    case "amount":
-      orderCol = timeEntries.ratePerHour;
-      break;
-    case "title":
-      orderCol = timeEntries.title;
-      break;
-    default:
-      orderCol = timeEntries.date;
-  }
+  const orderCol = getEntrySortColumn(options?.sortBy);
 
   return db.query.timeEntries.findMany({
     where: and(...conditions),
@@ -106,17 +134,7 @@ export async function getEntriesPaginated(options: {
   }
 
   const sortFn = options.sortDir === "asc" ? asc : desc;
-  let orderCol: Parameters<typeof asc>[0];
-  switch (options.sortBy) {
-    case "amount":
-      orderCol = timeEntries.ratePerHour;
-      break;
-    case "title":
-      orderCol = timeEntries.title;
-      break;
-    default:
-      orderCol = timeEntries.date;
-  }
+  const orderCol = getEntrySortColumn(options.sortBy);
 
   const whereClause = and(...conditions);
   const limit = options.limit ?? PAGE_SIZE;
@@ -155,17 +173,7 @@ export async function createEntry(input: EntryInput) {
   const session = await requireSession();
   const data = entrySchema.parse(input);
 
-  // Verify the client belongs to the authenticated user
-  const client = await db.query.clients.findFirst({
-    where: and(
-      eq(clients.id, data.clientId),
-      eq(clients.userId, session.user.id),
-    ),
-    columns: { id: true },
-  });
-  if (!client) {
-    throw new Error("Client not found");
-  }
+  await verifyClientOwnership(data.clientId, session.user.id);
 
   await db.insert(timeEntries).values({
     userId: session.user.id,
@@ -177,25 +185,14 @@ export async function createEntry(input: EntryInput) {
     date: data.date,
   });
 
-  revalidatePath("/entries");
-  revalidatePath("/");
+  revalidateEntries();
 }
 
 export async function updateEntry(id: string, input: EntryInput) {
   const session = await requireSession();
   const data = entrySchema.parse(input);
 
-  // Verify the client belongs to the authenticated user
-  const client = await db.query.clients.findFirst({
-    where: and(
-      eq(clients.id, data.clientId),
-      eq(clients.userId, session.user.id),
-    ),
-    columns: { id: true },
-  });
-  if (!client) {
-    throw new Error("Client not found");
-  }
+  await verifyClientOwnership(data.clientId, session.user.id);
 
   await db
     .update(timeEntries)
@@ -211,8 +208,7 @@ export async function updateEntry(id: string, input: EntryInput) {
       and(eq(timeEntries.id, id), eq(timeEntries.userId, session.user.id)),
     );
 
-  revalidatePath("/entries");
-  revalidatePath("/");
+  revalidateEntries();
 }
 
 export async function deleteEntry(id: string) {
@@ -224,8 +220,7 @@ export async function deleteEntry(id: string) {
       and(eq(timeEntries.id, id), eq(timeEntries.userId, session.user.id)),
     );
 
-  revalidatePath("/entries");
-  revalidatePath("/");
+  revalidateEntries();
 }
 
 export async function getUninvoicedEntriesForClient(clientId: string) {
@@ -266,8 +261,7 @@ export async function toggleManuallyInvoiced(id: string) {
       and(eq(timeEntries.id, id), eq(timeEntries.userId, session.user.id)),
     );
 
-  revalidatePath("/entries");
-  revalidatePath("/");
+  revalidateEntries();
 }
 
 const bulkIdsSchema = z
@@ -276,58 +270,46 @@ const bulkIdsSchema = z
   .max(500, "Too many entries selected");
 
 export async function bulkMarkInvoiced(ids: string[]) {
-  const session = await requireSession();
-  const validIds = bulkIdsSchema.parse(ids);
-
-  await db
-    .update(timeEntries)
-    .set({ manuallyInvoiced: true })
-    .where(
-      and(
-        inArray(timeEntries.id, validIds),
-        eq(timeEntries.userId, session.user.id),
-        isNull(timeEntries.invoiceId),
-      ),
-    );
-
-  revalidatePath("/entries");
-  revalidatePath("/");
+  await withBulkEntries(ids, async (validIds, userId) => {
+    await db
+      .update(timeEntries)
+      .set({ manuallyInvoiced: true })
+      .where(
+        and(
+          inArray(timeEntries.id, validIds),
+          eq(timeEntries.userId, userId),
+          isNull(timeEntries.invoiceId),
+        ),
+      );
+  });
 }
 
 export async function bulkUnmarkInvoiced(ids: string[]) {
-  const session = await requireSession();
-  const validIds = bulkIdsSchema.parse(ids);
-
-  await db
-    .update(timeEntries)
-    .set({ manuallyInvoiced: false })
-    .where(
-      and(
-        inArray(timeEntries.id, validIds),
-        eq(timeEntries.userId, session.user.id),
-        isNull(timeEntries.invoiceId),
-      ),
-    );
-
-  revalidatePath("/entries");
-  revalidatePath("/");
+  await withBulkEntries(ids, async (validIds, userId) => {
+    await db
+      .update(timeEntries)
+      .set({ manuallyInvoiced: false })
+      .where(
+        and(
+          inArray(timeEntries.id, validIds),
+          eq(timeEntries.userId, userId),
+          isNull(timeEntries.invoiceId),
+        ),
+      );
+  });
 }
 
 export async function bulkDeleteEntries(ids: string[]) {
-  const session = await requireSession();
-  const validIds = bulkIdsSchema.parse(ids);
-
-  await db
-    .delete(timeEntries)
-    .where(
-      and(
-        inArray(timeEntries.id, validIds),
-        eq(timeEntries.userId, session.user.id),
-        isNull(timeEntries.invoiceId),
-        eq(timeEntries.manuallyInvoiced, false),
-      ),
-    );
-
-  revalidatePath("/entries");
-  revalidatePath("/");
+  await withBulkEntries(ids, async (validIds, userId) => {
+    await db
+      .delete(timeEntries)
+      .where(
+        and(
+          inArray(timeEntries.id, validIds),
+          eq(timeEntries.userId, userId),
+          isNull(timeEntries.invoiceId),
+          eq(timeEntries.manuallyInvoiced, false),
+        ),
+      );
+  });
 }

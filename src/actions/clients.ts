@@ -1,11 +1,13 @@
 "use server";
 
-import { and, asc, desc, eq, ilike, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { clients, invoices, timeEntries } from "@/db/schema";
+import { getBillingStats } from "@/lib/billing-stats";
 import { PAGE_SIZE, type PaginatedResult } from "@/lib/pagination";
 import { requireSession } from "@/lib/session";
+import type { ClientWithStats } from "@/lib/types";
 import { type ClientInput, clientSchema } from "@/lib/validators";
 
 export async function getClients() {
@@ -41,15 +43,6 @@ export async function getClientsWithStats() {
     totalEarned: Number(row.totalEarned),
     unbilledAmount: Number(row.unbilledAmount),
   }));
-}
-
-interface ClientWithStats {
-  id: string;
-  name: string;
-  email: string | null;
-  totalMinutes: number;
-  totalEarned: number;
-  unbilledAmount: number;
 }
 
 export async function getClientsWithStatsPaginated(options: {
@@ -144,60 +137,13 @@ export async function getClientWithStats(id: string) {
     eq(timeEntries.clientId, id),
     eq(timeEntries.userId, session.user.id),
   );
+  if (!baseWhere) throw new Error("Invalid query conditions");
 
-  const [allStats] = await db
-    .select({
-      totalMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
-      totalEarned: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
-    })
-    .from(timeEntries)
-    .where(baseWhere);
-
-  const [billedStats] = await db
-    .select({
-      billedMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
-      billedAmount: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
-    })
-    .from(timeEntries)
-    .innerJoin(invoices, eq(timeEntries.invoiceId, invoices.id))
-    .where(and(baseWhere, inArray(invoices.status, ["sent", "paid"])));
-
-  const [manualStats] = await db
-    .select({
-      manualMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
-      manualAmount: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
-    })
-    .from(timeEntries)
-    .where(and(baseWhere, eq(timeEntries.manuallyInvoiced, true)));
-
-  const [paidStats] = await db
-    .select({
-      paidMinutes: sql<number>`coalesce(sum(${timeEntries.minutes}), 0)`,
-      paidAmount: sql<number>`coalesce(sum(${timeEntries.minutes} * ${timeEntries.ratePerHour} / 60.0), 0)`,
-    })
-    .from(timeEntries)
-    .innerJoin(invoices, eq(timeEntries.invoiceId, invoices.id))
-    .where(and(baseWhere, eq(invoices.status, "paid")));
-
-  const totalMinutes = Number(allStats.totalMinutes);
-  const totalEarned = Number(allStats.totalEarned);
-  const billedMinutes =
-    Number(billedStats.billedMinutes) + Number(manualStats.manualMinutes);
-  const billedAmount =
-    Number(billedStats.billedAmount) + Number(manualStats.manualAmount);
-  const paidMinutes = Number(paidStats.paidMinutes);
-  const paidAmount = Number(paidStats.paidAmount);
+  const stats = await getBillingStats(baseWhere);
 
   return {
     ...client,
-    totalMinutes,
-    totalEarned,
-    unbilledMinutes: totalMinutes - billedMinutes,
-    unbilledAmount: totalEarned - billedAmount,
-    billedMinutes,
-    billedAmount,
-    paidMinutes,
-    paidAmount,
+    ...stats,
   };
 }
 

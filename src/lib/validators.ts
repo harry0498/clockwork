@@ -1,5 +1,35 @@
 import { z } from "zod";
 
+const optionalStr = (max: number, label: string) =>
+  z
+    .string()
+    .max(max, `${label} must be ${max} characters or fewer`)
+    .optional()
+    .or(z.literal(""));
+
+const requiredAddressFields = {
+  addressLine1: z
+    .string()
+    .min(1, "Address line 1 is required")
+    .max(255, "Address must be 255 characters or fewer"),
+  addressLine2: optionalStr(255, "Address"),
+  county: z
+    .string()
+    .min(1, "County is required")
+    .max(100, "County must be 100 characters or fewer"),
+  postcode: z
+    .string()
+    .min(1, "Postcode is required")
+    .max(20, "Postcode must be 20 characters or fewer"),
+};
+
+const optionalAddressFields = {
+  addressLine1: optionalStr(255, "Address"),
+  addressLine2: optionalStr(255, "Address"),
+  county: optionalStr(100, "County"),
+  postcode: optionalStr(20, "Postcode"),
+};
+
 // Clients
 export const clientSchema = z.object({
   name: z
@@ -12,23 +42,7 @@ export const clientSchema = z.object({
     .max(255, "Email must be 255 characters or fewer")
     .optional()
     .or(z.literal("")),
-  addressLine1: z
-    .string()
-    .min(1, "Address line 1 is required")
-    .max(255, "Address must be 255 characters or fewer"),
-  addressLine2: z
-    .string()
-    .max(255, "Address must be 255 characters or fewer")
-    .optional()
-    .or(z.literal("")),
-  county: z
-    .string()
-    .min(1, "County is required")
-    .max(100, "County must be 100 characters or fewer"),
-  postcode: z
-    .string()
-    .min(1, "Postcode is required")
-    .max(20, "Postcode must be 20 characters or fewer"),
+  ...requiredAddressFields,
   vatNumber: z
     .string()
     .max(50, "VAT number must be 50 characters or fewer")
@@ -83,26 +97,7 @@ export const userProfileSchema = z.object({
     .string()
     .min(1, "Name is required")
     .max(255, "Name must be 255 characters or fewer"),
-  addressLine1: z
-    .string()
-    .max(255, "Address must be 255 characters or fewer")
-    .optional()
-    .or(z.literal("")),
-  addressLine2: z
-    .string()
-    .max(255, "Address must be 255 characters or fewer")
-    .optional()
-    .or(z.literal("")),
-  county: z
-    .string()
-    .max(100, "County must be 100 characters or fewer")
-    .optional()
-    .or(z.literal("")),
-  postcode: z
-    .string()
-    .max(20, "Postcode must be 20 characters or fewer")
-    .optional()
-    .or(z.literal("")),
+  ...optionalAddressFields,
   mobile: z
     .string()
     .max(20, "Mobile must be 20 characters or fewer")

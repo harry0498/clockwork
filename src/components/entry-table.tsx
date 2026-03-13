@@ -17,7 +17,7 @@ import { EmptyState } from "@/components/empty-state";
 import { calculateAmount, formatGBP, formatMinutes } from "@/lib/tax-year";
 import type { TimeEntryWithClient } from "@/lib/types";
 
-type Entry = Pick<
+export type Entry = Pick<
   TimeEntryWithClient,
   | "id"
   | "title"

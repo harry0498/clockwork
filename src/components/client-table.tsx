@@ -4,15 +4,7 @@ import Link from "next/link";
 import { ActionMenu } from "@/components/action-menu";
 import { type Column, DataTable } from "@/components/data-table";
 import { formatGBP, formatMinutes } from "@/lib/tax-year";
-
-interface ClientWithStats {
-  id: string;
-  name: string;
-  email: string | null;
-  totalMinutes: number;
-  totalEarned: number;
-  unbilledAmount: number;
-}
+import type { ClientWithStats } from "@/lib/types";
 
 export function ClientTable({
   clients,

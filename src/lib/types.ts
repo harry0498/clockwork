@@ -22,3 +22,21 @@ export type UserProfile = Pick<
 export type ClientPick = Pick<Client, "id" | "name">;
 export type TimeEntryWithClient = TimeEntry & { client: ClientPick };
 export type InvoiceWithClient = Invoice & { client: ClientPick };
+
+export interface ClientWithStats {
+  id: string;
+  name: string;
+  email: string | null;
+  totalMinutes: number;
+  totalEarned: number;
+  unbilledAmount: number;
+}
+
+export type InvoiceEntry = Pick<
+  TimeEntry,
+  "id" | "title" | "minutes" | "ratePerHour" | "date"
+>;
+
+export type ActionResult =
+  | { success: true }
+  | { success: false; error: string };

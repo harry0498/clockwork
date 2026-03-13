@@ -3,10 +3,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { createEntry, updateEntry } from "@/actions/entries";
-import { inputClassName } from "@/lib/constants";
+import {
+  buttonClassName,
+  buttonSecondaryClassName,
+  inputClassName,
+} from "@/lib/constants";
 import { todayISO } from "@/lib/tax-year";
+import { showErrorToast } from "@/lib/toast-helpers";
 import type { ClientPick, TimeEntry } from "@/lib/types";
 import { type EntryInput, entrySchema } from "@/lib/validators";
 
@@ -59,7 +63,7 @@ export function EntryForm({
         router.push("/entries");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      showErrorToast(err);
     }
   }
 
@@ -113,7 +117,7 @@ export function EntryForm({
           id="notes"
           rows={3}
           {...register("notes")}
-          className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-ring/30 resize-none"
+          className={`${inputClassName} resize-none`}
         />
         {errors.notes && (
           <p className="text-sm text-destructive">{errors.notes.message}</p>
@@ -176,14 +180,14 @@ export function EntryForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className={buttonClassName}
         >
           {isSubmitting ? "Saving..." : isEditing ? "Update Entry" : "Log Time"}
         </button>
         <button
           type="button"
           onClick={() => (onCancel ? onCancel() : router.back())}
-          className="rounded-lg border border-input px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
+          className={buttonSecondaryClassName}
         >
           Cancel
         </button>

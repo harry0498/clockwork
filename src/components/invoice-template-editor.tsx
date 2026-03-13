@@ -6,6 +6,7 @@ import { memo, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { updateInvoiceTemplate } from "@/actions/invoice-template";
+import { showErrorToast } from "@/lib/toast-helpers";
 
 const InvoicePdfPreview = dynamic(
   () => import("@/components/invoice-pdf-preview"),
@@ -19,7 +20,7 @@ const InvoicePdfPreview = dynamic(
   },
 );
 
-import { inputClassName } from "@/lib/constants";
+import { buttonClassName, inputClassName } from "@/lib/constants";
 import {
   FOOTER_PLACEHOLDERS,
   type FooterProfileData,
@@ -135,7 +136,7 @@ export function InvoiceTemplateEditor({
       await updateInvoiceTemplate(data);
       toast.success("Template saved");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      showErrorToast(err);
     }
   }, []);
 
@@ -416,7 +417,7 @@ export function InvoiceTemplateEditor({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className={`w-full ${buttonClassName}`}
         >
           {isSubmitting ? "Saving..." : "Save Template"}
         </button>

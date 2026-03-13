@@ -7,6 +7,7 @@ import { users, verificationTokens } from "@/db/schema";
 import { generateToken, hashToken } from "@/lib/crypto";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { checkRateLimit } from "@/lib/rate-limit";
+import type { ActionResult } from "@/lib/types";
 import {
   type ForgotPasswordInput,
   forgotPasswordSchema,
@@ -47,8 +48,6 @@ export async function signup(
   // Always return success to prevent email enumeration
   return { success: true };
 }
-
-type ActionResult = { success: true } | { success: false; error: string };
 
 export async function requestPasswordReset(
   data: ForgotPasswordInput,
@@ -183,7 +182,12 @@ export async function verifyTwoFactor(
       return { success: false, error: "No backup codes configured." };
     }
     const hashed = hashToken(parsed.data.code);
-    const codes: string[] = JSON.parse(user.backupCodes);
+    let codes: string[];
+    try {
+      codes = JSON.parse(user.backupCodes);
+    } catch {
+      return { success: false, error: "Backup codes are corrupted." };
+    }
     const codeIndex = codes.indexOf(hashed);
     if (codeIndex >= 0) {
       valid = true;

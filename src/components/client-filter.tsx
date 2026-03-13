@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { FilterSelect } from "@/components/filter-select";
+import { useFilterParam } from "@/lib/hooks/use-filter-param";
 
 export function ClientFilterClient({
   clients,
@@ -12,19 +12,7 @@ export function ClientFilterClient({
   basePath: string;
   currentClientId?: string;
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  function handleChange(value: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set("clientId", value);
-    } else {
-      params.delete("clientId");
-    }
-    params.delete("page");
-    router.push(`${basePath}?${params.toString()}`);
-  }
+  const [, handleChange] = useFilterParam("clientId", basePath);
 
   return (
     <FilterSelect

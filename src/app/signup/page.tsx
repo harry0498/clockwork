@@ -9,6 +9,7 @@ import { signup } from "@/actions/auth";
 import { Logo } from "@/components/logo";
 import { PrivacyContent } from "@/components/privacy-content";
 import { TermsContent } from "@/components/terms-content";
+import { buttonClassName } from "@/lib/constants";
 import { type SignupInput, signupSchema } from "@/lib/validators";
 
 const inputClassName =
@@ -234,7 +235,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className={`w-full ${buttonClassName}`}
           >
             {isSubmitting ? "Creating account..." : "Create account"}
           </button>
