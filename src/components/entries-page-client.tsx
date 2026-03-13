@@ -7,22 +7,9 @@ import { deleteEntry } from "@/actions/entries";
 import { AlertDialog } from "@/components/alert-dialog";
 import { EntryDialog } from "@/components/entry-dialog";
 import type { EntryFormProps } from "@/components/entry-form";
-import { EntryTable } from "@/components/entry-table";
-import type { ClientPick, TimeEntryWithClient } from "@/lib/types";
-
-type Entry = Pick<
-  TimeEntryWithClient,
-  | "id"
-  | "title"
-  | "notes"
-  | "minutes"
-  | "ratePerHour"
-  | "date"
-  | "clientId"
-  | "invoiceId"
-  | "manuallyInvoiced"
-  | "client"
->;
+import { type Entry, EntryTable } from "@/components/entry-table";
+import { buttonClassName } from "@/lib/constants";
+import type { ClientPick } from "@/lib/types";
 
 export function EntriesPageClient({
   entries,
@@ -51,7 +38,7 @@ export function EntriesPageClient({
         <button
           type="button"
           onClick={() => setCreateOpen(true)}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+          className={buttonClassName}
         >
           New Entry
         </button>

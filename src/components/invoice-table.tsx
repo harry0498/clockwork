@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ActionMenu } from "@/components/action-menu";
 import { type Column, DataTable } from "@/components/data-table";
+import { buttonSecondaryClassName } from "@/lib/constants";
 import { formatGBP } from "@/lib/tax-year";
 import type { InvoiceWithClient } from "@/lib/types";
 
@@ -118,7 +119,7 @@ export function DownloadPdfButton({ invoiceId }: { invoiceId: string }) {
     <button
       type="button"
       onClick={() => downloadInvoicePdf(invoiceId)}
-      className="rounded-lg border border-input px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
+      className={buttonSecondaryClassName}
     >
       Download PDF
     </button>

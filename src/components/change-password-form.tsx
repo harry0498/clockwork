@@ -4,7 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { changePassword } from "@/actions/settings";
-import { inputClassName } from "@/lib/constants";
+import { buttonClassName, inputClassName } from "@/lib/constants";
+import { showErrorToast } from "@/lib/toast-helpers";
 import {
   type ChangePasswordInput,
   changePasswordSchema,
@@ -31,7 +32,7 @@ export function ChangePasswordForm() {
       toast.success("Password changed");
       reset();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      showErrorToast(err);
     }
   }
 
@@ -88,11 +89,7 @@ export function ChangePasswordForm() {
         )}
       </div>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
-      >
+      <button type="submit" disabled={isSubmitting} className={buttonClassName}>
         {isSubmitting ? "Changing..." : "Change Password"}
       </button>
     </form>

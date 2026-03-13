@@ -8,9 +8,32 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { encrypt, generateBackupCodes } from "@/lib/crypto";
 import { requireSession } from "@/lib/session";
+import type { ActionResult } from "@/lib/types";
 import { type TotpSetupInput, totpSetupSchema } from "@/lib/validators";
 
-type ActionResult = { success: true } | { success: false; error: string };
+async function requirePasswordConfirmation(
+  password: string,
+): Promise<
+  { success: true; userId: string } | { success: false; error: string }
+> {
+  const session = await requireSession();
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, session.user.id),
+    columns: { passwordHash: true, twoFactorMethod: true },
+  });
+
+  if (!user) return { success: false, error: "User not found" };
+  if (!user.twoFactorMethod) {
+    return { success: false, error: "2FA is not enabled." };
+  }
+
+  const valid = await compare(password, user.passwordHash);
+  if (!valid) {
+    return { success: false, error: "Incorrect password." };
+  }
+
+  return { success: true, userId: session.user.id };
+}
 
 export async function generateTotpSetup(): Promise<
   | { success: true; secret: string; qrCodeUrl: string; otpauthUrl: string }
@@ -114,22 +137,8 @@ export async function enableEmailTwoFactor(): Promise<
 export async function disableTwoFactor(
   password: string,
 ): Promise<ActionResult> {
-  const session = await requireSession();
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
-    columns: { passwordHash: true, twoFactorMethod: true },
-  });
-
-  if (!user) return { success: false, error: "User not found" };
-  if (!user.twoFactorMethod) {
-    return { success: false, error: "2FA is not enabled." };
-  }
-
-  const valid = await compare(password, user.passwordHash);
-  if (!valid) {
-    return { success: false, error: "Incorrect password." };
-  }
+  const result = await requirePasswordConfirmation(password);
+  if (!result.success) return result;
 
   await db
     .update(users)
@@ -138,7 +147,7 @@ export async function disableTwoFactor(
       totpSecret: null,
       backupCodes: null,
     })
-    .where(eq(users.id, session.user.id));
+    .where(eq(users.id, result.userId));
 
   return { success: true };
 }
@@ -148,29 +157,15 @@ export async function regenerateBackupCodes(
 ): Promise<
   { success: true; backupCodes: string[] } | { success: false; error: string }
 > {
-  const session = await requireSession();
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
-    columns: { passwordHash: true, twoFactorMethod: true },
-  });
-
-  if (!user) return { success: false, error: "User not found" };
-  if (!user.twoFactorMethod) {
-    return { success: false, error: "2FA is not enabled." };
-  }
-
-  const valid = await compare(password, user.passwordHash);
-  if (!valid) {
-    return { success: false, error: "Incorrect password." };
-  }
+  const result = await requirePasswordConfirmation(password);
+  if (!result.success) return result;
 
   const { raw, hashed } = generateBackupCodes();
 
   await db
     .update(users)
     .set({ backupCodes: JSON.stringify(hashed) })
-    .where(eq(users.id, session.user.id));
+    .where(eq(users.id, result.userId));
 
   return { success: true, backupCodes: raw };
 }
@@ -190,8 +185,12 @@ export async function getTwoFactorStatus(): Promise<{
 
   let backupCodesRemaining = 0;
   if (user.backupCodes) {
-    const codes: string[] = JSON.parse(user.backupCodes);
-    backupCodesRemaining = codes.length;
+    try {
+      const codes: string[] = JSON.parse(user.backupCodes);
+      backupCodesRemaining = codes.length;
+    } catch {
+      // Corrupted backup codes — treat as zero remaining
+    }
   }
 
   return { method: user.twoFactorMethod, backupCodesRemaining };

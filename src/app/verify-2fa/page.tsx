@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { Suspense, useRef, useState } from "react";
 import { verifyTwoFactor } from "@/actions/auth";
 import { Logo } from "@/components/logo";
+import { buttonClassName } from "@/lib/constants";
 
 const inputClassName =
   "w-full rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-card-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30";
@@ -115,7 +116,7 @@ function VerifyForm() {
       <button
         type="submit"
         disabled={loading || !code.trim()}
-        className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+        className={`w-full ${buttonClassName}`}
       >
         {loading ? "Verifying..." : "Verify"}
       </button>

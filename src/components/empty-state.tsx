@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonClassName } from "@/lib/constants";
 
 interface EmptyStateProps {
   message: string;
@@ -20,7 +21,7 @@ export function EmptyState({
         <button
           type="button"
           onClick={onAction}
-          className="mt-3 inline-block rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+          className={`mt-3 inline-block ${buttonClassName}`}
         >
           {actionLabel}
         </button>
@@ -28,7 +29,7 @@ export function EmptyState({
       {actionLabel && actionHref && !onAction && (
         <Link
           href={actionHref}
-          className="mt-3 inline-block rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+          className={`mt-3 inline-block ${buttonClassName}`}
         >
           {actionLabel}
         </Link>

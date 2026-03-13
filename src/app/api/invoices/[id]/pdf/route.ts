@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { invoices, users } from "@/db/schema";
 import { authOptions } from "@/lib/auth";
 import { InvoicePdf } from "@/lib/invoice-pdf";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function GET(
   _request: Request,
@@ -17,6 +18,11 @@ export async function GET(
   }
 
   const { id } = await params;
+
+  const { allowed } = checkRateLimit(`pdf:${session.user.id}`, 20);
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
 
   const invoice = await db.query.invoices.findFirst({
     where: and(eq(invoices.id, id), eq(invoices.userId, session.user.id)),
@@ -32,6 +38,19 @@ export async function GET(
 
   const user = await db.query.users.findFirst({
     where: eq(users.id, session.user.id),
+    columns: {
+      name: true,
+      email: true,
+      addressLine1: true,
+      addressLine2: true,
+      county: true,
+      postcode: true,
+      mobile: true,
+      bankName: true,
+      accountNumber: true,
+      sortCode: true,
+      invoiceTemplate: true,
+    },
   });
 
   if (!user) {
@@ -51,7 +70,7 @@ export async function GET(
   return new NextResponse(uint8, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="${invoice.invoiceNumber}.pdf"`,
+      "Content-Disposition": `inline; filename="${invoice.invoiceNumber.replace(/[^a-zA-Z0-9_-]/g, "")}.pdf"`,
     },
   });
 }

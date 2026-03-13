@@ -27,6 +27,18 @@
       "react": "recommended"
     }
   },
+  "overrides": [
+    {
+      "includes": ["src/app/layout.tsx"],
+      "linter": {
+        "rules": {
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          }
+        }
+      }
+    }
+  ],
   "css": {
     "parser": {
       "tailwindDirectives": true

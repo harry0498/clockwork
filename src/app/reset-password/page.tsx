@@ -7,6 +7,7 @@ import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { resetPassword } from "@/actions/auth";
 import { Logo } from "@/components/logo";
+import { buttonClassName } from "@/lib/constants";
 import { type ResetPasswordInput, resetPasswordSchema } from "@/lib/validators";
 
 const inputClassName =
@@ -121,7 +122,7 @@ function ResetPasswordForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+        className={`w-full ${buttonClassName}`}
       >
         {isSubmitting ? "Resetting..." : "Reset password"}
       </button>

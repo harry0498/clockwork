@@ -3,9 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { createClient, updateClient } from "@/actions/clients";
-import { inputClassName } from "@/lib/constants";
+import {
+  buttonClassName,
+  buttonSecondaryClassName,
+  inputClassName,
+} from "@/lib/constants";
+import { showErrorToast } from "@/lib/toast-helpers";
 import type { Client } from "@/lib/types";
 import { type ClientInput, clientSchema } from "@/lib/validators";
 
@@ -60,7 +64,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
         router.push(isEditing ? `/clients/${client.id}` : "/clients");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      showErrorToast(err);
     }
   }
 
@@ -192,7 +196,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className={buttonClassName}
         >
           {isSubmitting
             ? "Saving..."
@@ -203,7 +207,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
         <button
           type="button"
           onClick={() => (onCancel ? onCancel() : router.back())}
-          className="rounded-lg border border-input px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
+          className={buttonSecondaryClassName}
         >
           Cancel
         </button>

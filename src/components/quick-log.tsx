@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { createEntry } from "@/actions/entries";
 import { inputClassName } from "@/lib/constants";
 import { todayISO } from "@/lib/tax-year";
+import { showErrorToast } from "@/lib/toast-helpers";
 import type { ClientPick } from "@/lib/types";
 import { type EntryInput, entrySchema } from "@/lib/validators";
 
@@ -56,7 +57,7 @@ export function QuickLog({ clients }: { clients: ClientPick[] }) {
       toast.success("Time logged");
       setTimeout(() => setShowSuccess(false), 2000);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      showErrorToast(err);
     }
   }
 

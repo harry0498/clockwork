@@ -2,12 +2,7 @@
 
 import { Dialog } from "@/components/dialog";
 import { InvoiceBuilder } from "@/components/invoice-builder";
-import type { ClientPick, TimeEntry } from "@/lib/types";
-
-type InvoiceEntry = Pick<
-  TimeEntry,
-  "id" | "title" | "minutes" | "ratePerHour" | "date"
->;
+import type { ClientPick, InvoiceEntry } from "@/lib/types";
 
 interface InvoiceDialogProps {
   open: boolean;

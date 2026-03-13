@@ -1,9 +1,25 @@
 const attempts = new Map<string, { count: number; resetAt: number }>();
 
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const DEFAULT_MAX_ATTEMPTS = 5;
+const DEFAULT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const CLEANUP_INTERVAL_MS = 60 * 1000; // 1 minute
 
-export function checkRateLimit(key: string): {
+// Periodic cleanup of expired entries to prevent memory leaks
+const cleanupTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [key, record] of attempts) {
+    if (now > record.resetAt) {
+      attempts.delete(key);
+    }
+  }
+}, CLEANUP_INTERVAL_MS);
+cleanupTimer.unref();
+
+export function checkRateLimit(
+  key: string,
+  maxAttempts = DEFAULT_MAX_ATTEMPTS,
+  windowMs = DEFAULT_WINDOW_MS,
+): {
   allowed: boolean;
   remaining: number;
 } {
@@ -11,14 +27,14 @@ export function checkRateLimit(key: string): {
   const record = attempts.get(key);
 
   if (!record || now > record.resetAt) {
-    attempts.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true, remaining: MAX_ATTEMPTS - 1 };
+    attempts.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, remaining: maxAttempts - 1 };
   }
 
-  if (record.count >= MAX_ATTEMPTS) {
+  if (record.count >= maxAttempts) {
     return { allowed: false, remaining: 0 };
   }
 
   record.count++;
-  return { allowed: true, remaining: MAX_ATTEMPTS - record.count };
+  return { allowed: true, remaining: maxAttempts - record.count };
 }

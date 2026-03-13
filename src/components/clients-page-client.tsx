@@ -9,15 +9,8 @@ import { ClientDialog } from "@/components/client-dialog";
 import type { ClientFormProps } from "@/components/client-form";
 import { ClientTable } from "@/components/client-table";
 import { EmptyState } from "@/components/empty-state";
-
-interface ClientWithStats {
-  id: string;
-  name: string;
-  email: string | null;
-  totalMinutes: number;
-  totalEarned: number;
-  unbilledAmount: number;
-}
+import { buttonClassName } from "@/lib/constants";
+import type { ClientWithStats } from "@/lib/types";
 
 export function ClientsPageClient({
   clients,
@@ -62,7 +55,7 @@ export function ClientsPageClient({
         <button
           type="button"
           onClick={() => setCreateOpen(true)}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+          className={buttonClassName}
         >
           New Client
         </button>

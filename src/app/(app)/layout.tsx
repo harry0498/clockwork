@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import { getOnboardingStatus } from "@/actions/dashboard";
 import { Nav } from "@/components/nav";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function AppLayout({
   children,

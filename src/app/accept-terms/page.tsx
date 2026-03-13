@@ -7,6 +7,7 @@ import { acceptTerms } from "@/actions/terms";
 import { Logo } from "@/components/logo";
 import { PrivacyContent } from "@/components/privacy-content";
 import { TermsContent } from "@/components/terms-content";
+import { buttonClassName } from "@/lib/constants";
 
 export default function AcceptTermsPage() {
   const router = useRouter();
@@ -116,7 +117,7 @@ export default function AcceptTermsPage() {
           type="button"
           onClick={handleAccept}
           disabled={!accepted || isSubmitting}
-          className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full ${buttonClassName} disabled:cursor-not-allowed`}
         >
           {isSubmitting ? "Accepting..." : "Accept & Continue"}
         </button>
